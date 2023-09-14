@@ -1,3 +1,6 @@
+// import { Group } from './s_calculator'
+const { Group, Member } = require('./s_calculator')
+
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
@@ -16,20 +19,41 @@ app.get('/', (req, res) => {
     res.send("HELLO");
 });
 
+// let groups = [];//? Maybe refactore to a better data structure
+let group = new Group();
+group.tipPercentage = 0;
+
 io.on('connection', (socket) => {
 
-    console.log('a user connected', user_count);
     user_count++;
+    console.log('a user connected', user_count);
+
+
+
+    let currentMember = new Member(socket.id, 0, 0);
+    group.AddMember(currentMember);
+    console.log(group);
+
+    // g.CalculateChangeForAll();
+    // g.CalculateBillWithTipForAll();
+    // console.log(g, 2);
 
 
     socket.on('calculate', (data) => {
-        console.log(data);
+        // console.log(data);
+        group.UpdateMember(currentMember, data.amount, data.bill);
+        console.log("----------- calc -----------");
+        console.log(group);
     })
 
 
     socket.on('disconnect', (reason) => {
         user_count--;
         console.log('a user disconnected', user_count);
+
+        group.RemoveMember(currentMember)
+        console.log(group);
+
     })
 });
 
@@ -38,6 +62,7 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
     console.log(`server running at http://localhost:${PORT}`);
 });
+
 
 
 

@@ -3,8 +3,12 @@ import axios from 'axios';
 import { NavigationContainer } from '@react-navigation/native'
 import Calculator from './Calculator';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+
+
+//  Screens
 import Payment from './pages/Payment';
+import HostEvent from './pages/HostEvent';
 
 import { socket } from './socket'
 
@@ -33,18 +37,14 @@ const App = () => {
 
 
     return (
-        <Payment />
-        // <NavigationContainer>
-        //     {/* <Calculator /> */}
-        //     <Stack.Navigator>
-        //         <Stack.Screen
-        //             name="Register"
-        //             component={RegisterPage}
-        //         // options={{ title: 'Welcome' }}
-        //         />
-        //         <Stack.Screen name="friends" component={FriendsPage} />
-        //     </Stack.Navigator>
-        // </NavigationContainer>
+        <NavigationContainer>
+            <Stack.Navigator initialRouteName='hostEvent' screenOptions={{ headerShown: false }}>
+                <Stack.Screen options={{}} name='payment'>{() => <Payment IsManager={false} />}</Stack.Screen>
+                <Stack.Screen name='hostEvent'>{() => <HostEvent />}</Stack.Screen>
+
+            </Stack.Navigator>
+        </NavigationContainer>
+
     )
 };
 
