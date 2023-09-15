@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { NavigationContainer } from '@react-navigation/native'
 import Calculator from './Calculator';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Linking, Alert, Button } from 'react-native';
 
 
 //  Screens
@@ -14,7 +14,13 @@ import { socket } from './socket'
 
 const Stack = createNativeStackNavigator();
 
+//  TODO: Create a link that join the client to the matching group.
+const linking = {
+    prefixes: ['app://']
+}
+
 const App = () => {
+
     const [isConnected, setIsConnected] = useState(socket.connected);
 
     useEffect(() => {
@@ -37,8 +43,12 @@ const App = () => {
 
 
     return (
-        <NavigationContainer>
+
+        <NavigationContainer linking={linking} >
+
             <Stack.Navigator initialRouteName='hostEvent' screenOptions={{ headerShown: false }}>
+
+
                 <Stack.Screen options={{}} name='payment'>{() => <Payment IsManager={false} />}</Stack.Screen>
                 <Stack.Screen name='hostEvent'>{() => <HostEvent />}</Stack.Screen>
 

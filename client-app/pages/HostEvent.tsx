@@ -9,6 +9,7 @@ export default function HostEvent() {
 
     return (
         <View>
+
             <Text>HostEvent</Text>
             <Button onPress={() => navigation.navigate('payment')} title="a" />
         </View>
