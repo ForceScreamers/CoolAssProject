@@ -1,51 +1,49 @@
 //  מחשב חשבון כולל טיפ דינמיי
 //  
+
+// import { GROUP_ID_NONE } from "./constants";
+
+
 class Group {
-    constructor() {
-        this.members = [];
+    constructor(id) {
+        this.users = [];
         this.tipPercentage = 0;
+        this.id = id;
     }
 
 
-    AddMember(member) {
-        //  Adds member only if they don't already exist
-        let memberExists = false;
-        for (let i = 0; i < this.members.length; i++) {
-            if (this.members[i].id == member.id) {
-                memberExists = true;
+    AddUser(user) {
+        //  Adds user only if they don't already exist
+        let userExists = false;
+        for (let i = 0; i < this.users.length; i++) {
+            if (this.users[i].id == user.id) {
+                userExists = true;
             }
         }
-        if (!memberExists) {
-            this.members.push(member);
+        if (!userExists) {
+            this.users.push(user);
         }
     }
-    RemoveMember(member) {
-        for (let i = 0; i < this.members.length; i++) {
-            if (this.members[i].id == member.id) {
-                this.members.splice(i, 1);
-            }
-        }
-    }
-    UpdateMember(member, amount, bill) {
-        for (let i = 0; i < this.members.length; i++) {
-            if (this.members[i].id == member.id) {
-                this.members[i].amount = amount;
-                this.members[i].bill = bill;
+
+    Removeuser(userId) {
+        for (let i = 0; i < this.users.length; i++) {
+            if (this.users[i].id == userId) {
+                this.users.splice(i, 1);
             }
         }
     }
 
     GetTotalAmount() {
         let totalAmount = 0;
-        this.members.forEach(member => {
-            totalAmount += member.amount;
+        this.users.forEach(user => {
+            totalAmount += user.amount;
         })
         return totalAmount;
     }
     GetTotalBill() {
         let totalBill = 0;
-        this.members.forEach(member => {
-            totalBill += member.bill;
+        this.users.forEach(user => {
+            totalBill += user.bill;
         })
         return totalBill;
     }
@@ -53,40 +51,43 @@ class Group {
     GetTipAmount() { return this.GetTotalBill() * (this.tipPercentage / 100) }
 
     CalculateChangeForAll() {
-        let memberCount = this.members.length;
+        let userCount = this.users.length;
 
-        this.members.forEach(member => {
+        this.users.forEach(user => {
             let change = 0;
             let tip = this.GetTipAmount();
-            let bill = member.bill;
-            let amount = member.amount;
+            let bill = user.bill;
+            let amount = user.amount;
 
-            change = amount - (tip / memberCount + bill);// Deduct the individual tip from the payment
+            change = amount - (tip / userCount + bill);// Deduct the individual tip from the payment
             change = +change.toFixed(2);//  Round to two decimal place
-            member.SetChange(change)
+            user.SetChange(change)
         })
     }
-    CalculateBillWithTipForAll() {
-        let memberCount = this.members.length;
 
-        this.members.forEach(member => {
+    CalculateBillWithTipForAll() {
+        let userCount = this.users.length;
+
+        this.users.forEach(user => {
             let billWithTip = 0;
             let tip = this.GetTipAmount();
-            let bill = member.bill;
+            let bill = user.bill;
 
-            billWithTip = tip / memberCount + bill;// Deduct the individual tip from the payment
+            billWithTip = tip / userCount + bill;// Deduct the individual tip from the payment
             billWithTip = +billWithTip.toFixed(2);//  Round to two decimal place
-            member.SetBill(billWithTip)
+            user.SetBill(billWithTip)
         })
     }
 }
 
-class Member {
-    constructor(id, amount, bill) {
+class User {
+    constructor(id, amount, bill, isManager) {
         this.id = id;
         this.amount = amount;
         this.bill = bill;
         this.change = 0;
+        this.isManager = isManager;
+        this.isInAnyGroup = false;
     }
 
     CalculateChange() {
@@ -101,4 +102,4 @@ class Member {
     }
 }
 
-module.exports = { Group, Member }
+module.exports = { Group, User }

@@ -1,5 +1,4 @@
-// import { Group } from './s_calculator'
-const { Group, Member } = require('./s_calculator')
+const { Group, User } = require('./s_calculator')
 
 const express = require('express');
 const { createServer } = require('http');
@@ -14,46 +13,103 @@ app.use(cors())
 
 const PORT = 3000
 
-let user_count = 0;
 app.get('/', (req, res) => {
     res.send("HELLO");
 });
 
-// let groups = [];//? Maybe refactore to a better data structure
-let group = new Group();
-group.tipPercentage = 0;
+let groups = [];//? Maybe refactore to a better data structure
+let connectedUsers = [];
+
+const NO_USER_FOUND = 0;
+
+
+// //TODO: Connect to database
+// //TODO: Calculate change & stuff on server
+
+function GetUserBySocketId(socketId) {
+    for (let i = 0; i < connectedUsers.length; i++) {
+        if (connectedUsers[i].id === socketId) {
+            return connectedUsers[i];
+        }
+    }
+    return NO_USER_FOUND;
+}
+
+/**
+ * Used to update a property of an existing user.
+ * Because parameters are passed by value, we need to find the original object within the list of users and update it's propery directly.
+ */
+
+function UpdateUserProp(user, prop, value) {
+    let connectedUser = connectedUsers.find(user => user.id === user.id);
+    if (connectedUser) {
+        connectedUser[prop] = value;
+    }
+}
+
+function GetGroupById(id) {
+    let foundGroup = groups.filter(group => {
+        return group.id === id;
+    })
+
+    return foundGroup[0];
+}
+
+function CreateGroupFor(user) {
+    UpdateUserProp(user, 'isInAnyGroup', true);
+    UpdateUserProp(user, 'isManager', true);
+
+    let groupId = GenerateGroupId();
+    groups.push(new Group(groupId));
+
+    GetGroupById(groupId).AddUser(user);
+}
+
+function GenerateGroupId() {
+    return groups.length;// The group id is dictated by it's index in the groups array
+}
 
 io.on('connection', (socket) => {
 
-    user_count++;
-    console.log('a user connected', user_count);
+    connectedUsers.push(new User(socket.id, 0, 0, false));
+    console.log('a user connected', connectedUsers.length);
 
 
+    socket.on('createGroup', (data) => {
+        let user = GetUserBySocketId(socket.id);
+        if (user.isInAnyGroup == false) {
+            CreateGroupFor(user);
+        }
+        console.log(connectedUsers);
+    })
 
-    let currentMember = new Member(socket.id, 0, 0);
-    group.AddMember(currentMember);
-    console.log(group);
+    socket.on('joinGroup', data => {
+        let user = GetUserBySocketId(socket.id);
+        if (user.isInAnyGroup == false) {
+            GetGroupById(data.groupId).AddUser(user);
+        }
+    })
 
-    // g.CalculateChangeForAll();
-    // g.CalculateBillWithTipForAll();
-    // console.log(g, 2);
-
-
-    socket.on('calculate', (data) => {
-        // console.log(data);
-        group.UpdateMember(currentMember, data.amount, data.bill);
+    socket.on('calculate', data => {
         console.log("----------- calc -----------");
-        console.log(group);
+    })
+
+    socket.on('leaveGroup', data => {
+        UpdateUserProp(user, 'isInAnyGroup', false);
+        //
     })
 
 
     socket.on('disconnect', (reason) => {
-        user_count--;
-        console.log('a user disconnected', user_count);
+        for (let i = 0; i < connectedUsers.length; i++) {
+            if (connectedUsers[i].id == socket.id) {
+                connectedUsers.splice(i, 1);
+            }
+        }
+        console.log('a user disconnected', connectedUsers.length);
 
-        group.RemoveMember(currentMember)
-        console.log(group);
-
+        // group.RemoveMember(currentMember)
+        // console.log(group);
     })
 });
 
@@ -75,42 +131,3 @@ server.listen(PORT, () => {
 //     next();
 // });
 
-// //TODO: Connect to database
-// //TODO: Calculate change & stuff on server
-
-
-
-// io.on('connection', () => {
-//     console.log('a user connected');
-// })
-
-// app.listen(PORT, () => {
-//     console.log(`Example app listening on port ${PORT}`)
-// })
-
-// app.get('/', (req, res) => {
-//     res.send('Hello World!')
-//     console.log("res from /!")
-// })
-
-// app.get('/users', (req, res) => {
-
-//     client.query('SELECT * FROM public."User";', (err, res) => {
-//         console.log("E")
-//         if (err) {
-//             console.log(err.stack)
-//         } else {
-//             console.log(res.rows)
-
-//             res.send(res.rows);
-//         }
-//     })
-// })
-
-// app.get('/user', (req, res) => {
-//     res.send('This is user!');
-// })
-
-// app.post('/user', (req, res) => {
-//     console.log(req);
-// })
