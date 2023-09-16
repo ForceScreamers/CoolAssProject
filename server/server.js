@@ -41,9 +41,10 @@ function GetUserBySocketId(socketId) {
  */
 
 function UpdateUserProp(user, prop, value) {
-    let connectedUser = connectedUsers.find(user => user.id === user.id);
-    if (connectedUser) {
-        connectedUser[prop] = value;
+    let connectedUserIndex = connectedUsers.map(connectedUser => connectedUser.id).indexOf(user.id)
+
+    if (connectedUserIndex !== -1) {
+        connectedUsers[connectedUserIndex][prop] = value;
     }
 }
 
@@ -80,14 +81,25 @@ io.on('connection', (socket) => {
         if (user.isInAnyGroup == false) {
             CreateGroupFor(user);
         }
-        console.log(connectedUsers);
     })
-
+    //TODO: Fix group memebers not showing up
     socket.on('joinGroup', data => {
         let user = GetUserBySocketId(socket.id);
         if (user.isInAnyGroup == false) {
+            console.log('added')
             GetGroupById(data.groupId).AddUser(user);
+            UpdateUserProp(user, 'isInAnyGroup', true);
         }
+        console.log(connectedUsers);
+        console.log(groups);
+
+        //  create room and emit an update to the room
+        let emitData = JSON.stringify({
+            groupData: [{
+                name: 'Kfir!'
+            }]
+        })
+        socket.emit('updateGroup', emitData)
     })
 
     socket.on('calculate', data => {
@@ -107,9 +119,6 @@ io.on('connection', (socket) => {
             }
         }
         console.log('a user disconnected', connectedUsers.length);
-
-        // group.RemoveMember(currentMember)
-        // console.log(group);
     })
 });
 

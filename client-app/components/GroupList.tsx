@@ -13,6 +13,7 @@ export default function GroupList({ Members }) {
         <View style={{ flex: 1 }}>
             <FlatList
                 data={Members}
+                keyExtractor={item => { return item.id }}
                 renderItem={({ item }) => (
                     <GroupListMember
                         Name={item.name}
@@ -23,7 +24,6 @@ export default function GroupList({ Members }) {
                         IsManager={item.isManager}
                     />
                 )}
-                keyExtractor={item => item.id}
             />
         </View>
     )

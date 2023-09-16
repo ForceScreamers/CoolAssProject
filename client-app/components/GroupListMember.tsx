@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
         marginTop: 15,
     },
     cell: {
-        backgroundColor: 'lightblue'
+        backgroundColor: 'red',
+        color: 'black'
     }
 })
