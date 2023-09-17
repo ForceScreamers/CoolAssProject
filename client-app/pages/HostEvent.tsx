@@ -17,7 +17,7 @@ export default function HostEvent() {
             // console.log(data.groupData)
             let parsedData = JSON.parse(data)
             console.log(parsedData)
-            setGroupList(parsedData.groupData)
+            setGroupList([...parsedData.groupData])
         })
 
         return () => {
@@ -26,8 +26,10 @@ export default function HostEvent() {
     }, [socket])
 
 
+
     useEffect(() => {
-        console.log(groupList[0])
+        console.log("groupList")
+        console.log(groupList)
     }, [groupList])
 
 
@@ -43,22 +45,24 @@ export default function HostEvent() {
     }
 
     return (
-        <View>
+        <View style={{ flex: 1 }}>
 
-            <Text>HostEvent</Text>
-            <Button onPress={() => navigation.navigate('payment')} title="a" />
+            <Text>יצירת אירוע</Text>
             <Button onPress={RequestCreateGroup} title="create group" />
             <TextInput
                 onChangeText={input => setInput(input)}
                 placeholderTextColor={'#7F7F7F'}
                 underlineColorAndroid={'#70AD47'}
             />
-            <Button onPress={RequestJoinGroup} title="join group" />
-
-            <View>
-                <Text>hello!</Text>
+            <View style={{ flex: 1 }}>
                 <GroupList Members={groupList} />
             </View>
+
+            <Button onPress={() => navigation.navigate('payment')} title="צור אירוע" />
+
+            <Button onPress={RequestJoinGroup} title="join group" />
+
+
         </View>
     )
 }

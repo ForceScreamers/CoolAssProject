@@ -1,17 +1,21 @@
 import { View, Text, StyleSheet } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 //  amount, change, bill, 
 //  isReady, name, isManager
 
-export default function GroupListMember({ Amount, Change, Bill, IsReady, Name, IsManager }) {
+export default function GroupListMember({ Change, IsReady, Name, IsManager }) {
+    // ? Maybe add Bill & Amount
+    useEffect(() => {
+        console.log(Name);
+    })
     return (
         <View>
             <View style={styles.rowContainer}>
                 <Text style={styles.cell}>{Name}</Text>
-                <Text style={styles.cell}>{Amount}</Text>
                 <Text style={styles.cell}>{Change}</Text>
-                <Text style={styles.cell}>{Bill}</Text>
+                <Text style={styles.cell}>{(IsManager ? 'מנהל' : 'לא מנהל')}</Text>
+                <Text style={styles.cell}>{(IsReady ? 'מוכן' : 'לא מוכן')}</Text>
             </View>
         </View>
     )
@@ -22,9 +26,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row-reverse',
         justifyContent: 'space-evenly',
         marginTop: 15,
+        backgroundColor: 'lightgray'
     },
     cell: {
-        backgroundColor: 'red',
+        backgroundColor: 'lightblue',
         color: 'black'
     }
 })

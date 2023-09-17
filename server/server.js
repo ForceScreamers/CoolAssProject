@@ -82,7 +82,7 @@ io.on('connection', (socket) => {
             CreateGroupFor(user);
         }
     })
-    //TODO: Fix group memebers not showing up
+
     socket.on('joinGroup', data => {
         let user = GetUserBySocketId(socket.id);
         if (user.isInAnyGroup == false) {
@@ -96,7 +96,10 @@ io.on('connection', (socket) => {
         //  create room and emit an update to the room
         let emitData = JSON.stringify({
             groupData: [{
-                name: 'Kfir!'
+                name: 'Kfir!',
+                change: user.change,
+                isManager: user.isManager,
+                isReady: true,
             }]
         })
         socket.emit('updateGroup', emitData)
