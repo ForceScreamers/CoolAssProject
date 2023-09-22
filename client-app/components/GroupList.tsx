@@ -12,9 +12,10 @@ export default function GroupList({ Members }) {
         <View style={{ flex: 1 }}>
             <FlatList
                 data={Members}
-                keyExtractor={(item, index) => { return index.toString() }}
-                renderItem={({ item }) => (
+                keyExtractor={(item, index) => item.id}
+                renderItem={({ item, index }) => (
                     <GroupListMember
+                        key={item.id}
                         Name={item.name}
                         Change={item.change}
                         IsReady={item.isReady}

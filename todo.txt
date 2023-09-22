@@ -1,0 +1,22 @@
+--- SERVER ---
+- connect server to database
+- group link generator
+- 
+
+--- CLIENT ---
+- screens:
+    home
+    host event
+    join event
+
+- Create a link that join the client to the matching group
+- Disconnect from group when leaving payment screen
+
+
+--- DESIGN ---
+create the basic flow of the app
+
+
+--- OTHER ---
+
+

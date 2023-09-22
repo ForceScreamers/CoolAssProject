@@ -6,17 +6,14 @@ import React, { useEffect } from 'react'
 
 export default function GroupListMember({ Change, IsReady, Name, IsManager }) {
     // ? Maybe add Bill & Amount
-    useEffect(() => {
-        console.log(Name);
-    })
+
     return (
-        <View>
-            <View style={styles.rowContainer}>
-                <Text style={styles.cell}>{Name}</Text>
-                <Text style={styles.cell}>{Change}</Text>
-                <Text style={styles.cell}>{(IsManager ? 'מנהל' : 'לא מנהל')}</Text>
-                <Text style={styles.cell}>{(IsReady ? 'מוכן' : 'לא מוכן')}</Text>
-            </View>
+
+        <View style={styles.rowContainer}>
+            <Text style={styles.cell}>{Name}</Text>
+            <Text style={styles.cell}>{Change}</Text>
+            <Text style={styles.cell}>{(IsManager ? 'מנהל' : 'לא מנהל')}</Text>
+            <Text style={styles.cell}>{(IsReady ? 'מוכן' : 'לא מוכן')}</Text>
         </View>
     )
 }

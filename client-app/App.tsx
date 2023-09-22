@@ -7,14 +7,15 @@ import { View, Text, StyleSheet, Linking, Alert, Button } from 'react-native';
 
 
 //  Screens
-import Payment from './pages/Payment';
 import HostEvent from './pages/HostEvent';
+import JoinEvent from './pages/JoinEvent';
 
 import { socket } from './socket'
+import Home from './pages/Home';
+import Payment from './pages/Payment';
 
 const Stack = createNativeStackNavigator();
 
-//  TODO: Create a link that join the client to the matching group.
 const linking = {
     prefixes: ['app://']
 }
@@ -22,6 +23,8 @@ const linking = {
 const App = () => {
 
     const [isConnected, setIsConnected] = useState(socket.connected);
+
+    const [groupList, setGroupList] = useState([]);
 
     useEffect(() => {
         function onConnect() {
@@ -35,22 +38,35 @@ const App = () => {
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
 
+        socket.on('joinedGroup', data => {
+            console.log("____________")
+
+
+            setGroupList(JSON.parse(data).groupData);
+        })
+
+
+
         return () => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
+
+            socket.off('joinedGroup');
         }
-    }, [])
+    }, [socket])
 
 
     return (
 
         <NavigationContainer linking={linking} >
 
-            <Stack.Navigator initialRouteName='hostEvent' screenOptions={{ headerShown: false }}>
+            <Stack.Navigator initialRouteName='home' screenOptions={{ animation: 'fade', headerShown: false, contentStyle: { backgroundColor: '#606060' } }}>
 
+                <Stack.Screen name='home'>{() => <Home />}</Stack.Screen>
 
-                <Stack.Screen options={{}} name='payment'>{() => <Payment IsManager={false} />}</Stack.Screen>
+                <Stack.Screen name='payment'>{() => <Payment GroupData={groupList} />}</Stack.Screen>
                 <Stack.Screen name='hostEvent'>{() => <HostEvent />}</Stack.Screen>
+                <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
 
             </Stack.Navigator>
         </NavigationContainer>

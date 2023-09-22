@@ -17,14 +17,14 @@ app.get('/', (req, res) => {
     res.send("HELLO");
 });
 
-let groups = [];//? Maybe refactore to a better data structure
+// let groups = [];//? Maybe refactore to a better data structure
 let connectedUsers = [];
 
 const NO_USER_FOUND = 0;
 
-
-// //TODO: Connect to database
-// //TODO: Calculate change & stuff on server
+let groups = [
+    new Group(1)
+]
 
 function GetUserBySocketId(socketId) {
     for (let i = 0; i < connectedUsers.length; i++) {
@@ -39,7 +39,6 @@ function GetUserBySocketId(socketId) {
  * Used to update a property of an existing user.
  * Because parameters are passed by value, we need to find the original object within the list of users and update it's propery directly.
  */
-
 function UpdateUserProp(user, prop, value) {
     let connectedUserIndex = connectedUsers.map(connectedUser => connectedUser.id).indexOf(user.id)
 
@@ -83,26 +82,34 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('joinGroup', data => {
+    socket.on('canJoinGroup', data => {
         let user = GetUserBySocketId(socket.id);
-        if (user.isInAnyGroup == false) {
-            console.log('added')
-            GetGroupById(data.groupId).AddUser(user);
-            UpdateUserProp(user, 'isInAnyGroup', true);
-        }
-        console.log(connectedUsers);
-        console.log(groups);
+        console.log(user)
 
-        //  create room and emit an update to the room
-        let emitData = JSON.stringify({
-            groupData: [{
-                name: 'Kfir!',
-                change: user.change,
-                isManager: user.isManager,
-                isReady: true,
-            }]
-        })
-        socket.emit('updateGroup', emitData)
+        let group = GetGroupById(data.groupId);
+
+        if (user.isInAnyGroup === false && group !== undefined) {
+            console.log('joined group')
+            group.AddUser(user);
+            UpdateUserProp(user, 'isInAnyGroup', true);
+
+            //  create room and emit an update to the room
+            let emitData = JSON.stringify({
+                groupData: [{
+                    id: 0,
+                    name: 'Kfir!',
+                    change: user.change,
+                    isManager: user.isManager,
+                    isReady: true,
+                }]
+            })
+            socket.emit('joinedGroup', emitData)
+        }
+        else {
+            console.log("not found")
+
+            socket.emit('groupNotFound');
+        }
     })
 
     socket.on('calculate', data => {
