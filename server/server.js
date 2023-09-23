@@ -95,13 +95,59 @@ io.on('connection', (socket) => {
 
             //  create room and emit an update to the room
             let emitData = JSON.stringify({
-                groupData: [{
-                    id: 0,
-                    name: 'Kfir!',
-                    change: user.change,
-                    isManager: user.isManager,
-                    isReady: true,
-                }]
+                groupData: [
+                    {
+                        id: 0,
+                        name: 'כ',
+                        change: user.change,
+                        isManager: user.isManager,
+                        isReady: true,
+                    },
+                    {
+                        id: 1,
+                        name: 'כפ',
+                        change: user.change,
+                        isManager: true,
+                        isReady: true,
+                    }, {
+                        id: 2,
+                        name: 'כפי',
+                        change: user.change,
+                        isManager: user.isManager,
+                        isReady: true,
+                    }, {
+                        id: 3,
+                        name: 'כפיר',
+                        change: user.change,
+                        isManager: user.isManager,
+                        isReady: true,
+                    }, {
+                        id: 4,
+                        name: 'כפירר',
+                        change: user.change,
+                        isManager: user.isManager,
+                        isReady: false,
+                    }, {
+                        id: 5,
+                        name: 'כפיררר',
+                        change: user.change,
+                        isManager: user.isManager,
+                        isReady: false,
+                    }, {
+                        id: 6,
+                        name: 'כפירררר',
+                        change: user.change,
+                        isManager: user.isManager,
+                        isReady: true,
+                    }, {
+                        id: 7,
+                        name: 'כפיררררר',
+                        change: user.change,
+                        isManager: user.isManager,
+                        isReady: false,
+                    },
+
+                ]
             })
             socket.emit('joinedGroup', emitData)
         }

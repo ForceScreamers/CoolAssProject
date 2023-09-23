@@ -26,7 +26,7 @@ export default function PaymentInput({ IsManager }) {
     return (
         <View style={styles.mainContainer}>
             <Text>האירוע שלי</Text>
-            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 120 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                 <View style={styles.inputs}>
                     <UserInputAndTitle
                         TitleSize={25}
