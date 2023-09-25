@@ -26,6 +26,15 @@ let groups = [
     new Group(1)
 ]
 
+groups[0].AddUser(new User('k1', 0, 0, 0, false))
+groups[0].AddUser(new User('k2', 1, 0, 0, false))
+groups[0].AddUser(new User('k3', 2, 0, 0, true))
+
+groups[0].users[0].isReady = true;
+groups[0].users[1].isReady = true;
+groups[0].users[2].isReady = true;
+
+
 function GetUserBySocketId(socketId) {
     for (let i = 0; i < connectedUsers.length; i++) {
         if (connectedUsers[i].id === socketId) {
@@ -63,103 +72,78 @@ function CreateGroupFor(user) {
     groups.push(new Group(groupId));
 
     GetGroupById(groupId).AddUser(user);
+
+    return groupId;
 }
 
 function GenerateGroupId() {
     return groups.length;// The group id is dictated by it's index in the groups array
 }
 
+
 io.on('connection', (socket) => {
 
-    connectedUsers.push(new User(socket.id, 0, 0, false));
-    console.log('a user connected', connectedUsers.length);
+    connectedUsers.push(new User('k', socket.id, 0, 0, false));
+    console.log('user connected', connectedUsers.length);
 
-
-    socket.on('createGroup', (data) => {
+    socket.on('canCreateGroup', (data) => {
+        console.log('creating group')
         let user = GetUserBySocketId(socket.id);
+        let groupId;
         if (user.isInAnyGroup == false) {
-            CreateGroupFor(user);
+            groupId = CreateGroupFor(user);
+
+            let emitData = {
+                groupCode: groupId
+            }
+
+            socket.emit('createdGroup', emitData);
+        }
+        else {
+            socket.emit('cantCreateGroup');
         }
     })
 
     socket.on('canJoinGroup', data => {
         let user = GetUserBySocketId(socket.id);
-        console.log(user)
-
         let group = GetGroupById(data.groupId);
 
         if (user.isInAnyGroup === false && group !== undefined) {
             console.log('joined group')
-            group.AddUser(user);
             UpdateUserProp(user, 'isInAnyGroup', true);
+            UpdateUserProp(user, 'groupId', group.id);
 
-            //  create room and emit an update to the room
-            let emitData = JSON.stringify({
-                groupData: [
-                    {
-                        id: 0,
-                        name: 'כ',
-                        change: user.change,
-                        isManager: user.isManager,
-                        isReady: true,
-                    },
-                    {
-                        id: 1,
-                        name: 'כפ',
-                        change: user.change,
-                        isManager: true,
-                        isReady: true,
-                    }, {
-                        id: 2,
-                        name: 'כפי',
-                        change: user.change,
-                        isManager: user.isManager,
-                        isReady: true,
-                    }, {
-                        id: 3,
-                        name: 'כפיר',
-                        change: user.change,
-                        isManager: user.isManager,
-                        isReady: true,
-                    }, {
-                        id: 4,
-                        name: 'כפירר',
-                        change: user.change,
-                        isManager: user.isManager,
-                        isReady: false,
-                    }, {
-                        id: 5,
-                        name: 'כפיררר',
-                        change: user.change,
-                        isManager: user.isManager,
-                        isReady: false,
-                    }, {
-                        id: 6,
-                        name: 'כפירררר',
-                        change: user.change,
-                        isManager: user.isManager,
-                        isReady: true,
-                    }, {
-                        id: 7,
-                        name: 'כפיררררר',
-                        change: user.change,
-                        isManager: user.isManager,
-                        isReady: false,
-                    },
+            group.AddUser(user);
 
-                ]
-            })
+            let emitData = JSON.stringify(
+                groups[0].users
+            )
             socket.emit('joinedGroup', emitData)
         }
         else {
-            console.log("not found")
-
             socket.emit('groupNotFound');
+            console.log("not found");
         }
     })
 
-    socket.on('calculate', data => {
-        console.log("----------- calc -----------");
+    socket.on('userReady', data => {
+        let userData = data;
+
+        let user = GetUserBySocketId(socket.id);
+
+        //  Update user data
+        UpdateUserProp(user, 'amount', parseFloat(userData.amount))//TODO:create try parse float that returns 0 if isn't float
+        UpdateUserProp(user, 'bill', parseFloat(userData.bill))
+        UpdateUserProp(user, 'isReady', true);
+
+        let group = GetGroupById(user.groupId);
+
+        socket.emit('updatedGroup', group.users)
+
+        if (group.IsReady()) {
+            //TODO:  Calculate all
+            console.log('group ready!')
+        }
     })
 
     socket.on('leaveGroup', data => {

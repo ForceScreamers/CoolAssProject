@@ -11,6 +11,5 @@ export default function Home() {
             <Button onPress={() => navigation.navigate('hostEvent')} title="צור אירוע" />
             <Button onPress={() => navigation.navigate('joinEvent')} title="הצטרף לאירוע" />
         </View>
-
     )
 }

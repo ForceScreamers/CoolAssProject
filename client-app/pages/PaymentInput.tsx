@@ -6,7 +6,7 @@ import UserInputAndTitle from '../components/UserInputAndTitle';
 import TipInputAndDisplay from '../components/TipInputAndDisplay';
 
 
-export default function PaymentInput({ IsManager }) {
+export default function PaymentInput({ IsManager, IsReady, CollapseSheet }) {
     const [amount, setAmount] = useState(0);
     const [bill, setBill] = useState(0);
 
@@ -14,18 +14,22 @@ export default function PaymentInput({ IsManager }) {
 
 
     //! Change ip to the current computer that's running the server
-    function CalculateChange() {
-        socket.emit('calculate', {
+    function ConfirmPayment() {
+        CollapseSheet();
+
+
+        socket.emit('userReady', {
             amount: amount,
             bill: bill,
-            tip: tipValue
+            tip: tipValue,
         });
         console.log("Request to server")
     }
 
     return (
+
         <View style={styles.mainContainer}>
-            <Text>האירוע שלי</Text>
+            <Text style={{ fontSize: 30, color: 'white' }}>האירוע שלי</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                 <View style={styles.inputs}>
                     <UserInputAndTitle
@@ -61,16 +65,16 @@ export default function PaymentInput({ IsManager }) {
             </View>
 
             <View style={styles.buttonContainer}>
-                <Pressable onPress={CalculateChange} style={styles.button}>
+                <Pressable onPress={ConfirmPayment} style={styles.button}>
                     <Text style={styles.buttonText}>אישור</Text>
                 </Pressable>
             </View>
 
         </View>
+
     )
 }
 
-const DEFAULT_FONT_FAMILY = ''
 
 const styles = StyleSheet.create({
     inputs: {

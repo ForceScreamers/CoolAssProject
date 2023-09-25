@@ -78,15 +78,30 @@ class Group {
             user.SetBill(billWithTip)
         })
     }
+
+    IsReady() {
+        let allUsersReady = true;
+
+        for (let i = 0; i < this.users.length; i++) {
+            if (this.users[i].isReady === false) {
+                allUsersReady = false;
+            }
+        }
+
+        return allUsersReady;
+    }
 }
 
 class User {
-    constructor(id, amount, bill, isManager) {
+    constructor(name, id, amount, bill, isManager) {
         this.id = id;
+        this.name = name;
+        this.groupId = -1;
         this.amount = amount;
         this.bill = bill;
         this.change = 0;
         this.isManager = isManager;
+        this.isReady = false;
         this.isInAnyGroup = false;
     }
 

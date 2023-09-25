@@ -6,32 +6,36 @@ import { socket } from '../socket'
 import GroupList from '../components/GroupList';
 import GoBackButton from '../components/GoBackButton';
 
-export default function HostEvent() {
+export default function HostEvent({ GroupCode }) {
 
     const navigation = useNavigation();
 
 
-
-
-
-
-
-
     function RequestCreateGroup() {
-        socket.emit('createGroup');
+        socket.emit('canCreateGroup');
     }
 
+    useEffect(() => {
+        socket.on('createdGroup', () => {
+            navigation.navigate('payment');
+        })
+        socket.on('cantCreateGroup', () => {
+            alert('לא ניתן ליצור קבוצה');
+        })
+
+        return () => {
+            socket.off('joinedGroup');
+            socket.off('cantCreateGroup');
+        }
+    }, [socket])
 
     return (
         <View style={{ flex: 1 }}>
             <GoBackButton />
 
-            <Text>יצירת אירוע</Text>
-            <Button onPress={RequestCreateGroup} title="create group" />
+            <Text>{GroupCode}</Text>
 
-
-
-            <Button onPress={() => navigation.navigate('payment')} title="צור אירוע" />
+            <Button title='צור' onPress={RequestCreateGroup} />
         </View>
     )
 }
