@@ -7,23 +7,30 @@ import TipInputAndDisplay from '../components/TipInputAndDisplay';
 
 
 export default function PaymentInput({ IsManager, IsReady, CollapseSheet }) {
-    const [amount, setAmount] = useState(0);
-    const [bill, setBill] = useState(0);
+    const [amount, setAmount] = useState('');
+    const [bill, setBill] = useState('');
 
-    const [tipValue, setTipValue] = useState(0);
+    const [managerTipValue, setTipValue] = useState(0);
 
+    // TODO: Fix payment input validation!
+    const [amountValid, setAmountValid] = useState(false)
+    const [billValid, setBillValid] = useState(false)
 
-    //! Change ip to the current computer that's running the server
     function ConfirmPayment() {
-        CollapseSheet();
+        console.log("amount", amount)
+        setAmountValid(amount === '' ? false : true);
+        setBillValid(bill === '' ? false : true);
 
+        if (amountValid && billValid) {
+            CollapseSheet();
 
-        socket.emit('userReady', {
-            amount: amount,
-            bill: bill,
-            tip: tipValue,
-        });
-        console.log("Request to server")
+            socket.emit('userReady', {
+                amount: amount,
+                bill: bill,
+                tip: managerTipValue,
+            });
+            console.log("Request to server")
+        }
     }
 
     return (
@@ -42,6 +49,8 @@ export default function PaymentInput({ IsManager, IsReady, CollapseSheet }) {
                         MaxLength={10}
                         Type='numeric'
                         PlaceHolder='₪0.00'
+
+                        ShowValidAlert={amountValid}
                     />
                     <UserInputAndTitle
                         TitleSize={25}
@@ -53,13 +62,15 @@ export default function PaymentInput({ IsManager, IsReady, CollapseSheet }) {
                         MaxLength={10}
                         Type='numeric'
                         PlaceHolder='₪0.00'
+
+                        ShowValidAlert={billValid}
                     />
                 </View>
 
                 <TipInputAndDisplay
                     IsManager={IsManager}
                     SetTip={setTipValue}
-                    TipValue={tipValue}
+                    TipValue={managerTipValue}
                 />
 
             </View>

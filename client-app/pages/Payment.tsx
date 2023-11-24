@@ -1,8 +1,10 @@
-import { View, Text, FlatList, Button, StyleSheet, Pressable, Keyboard } from 'react-native'
+import { View, Text, FlatList, Button, StyleSheet, Pressable, Keyboard, Alert, BackHandler } from 'react-native'
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
 import PaymentInput from './PaymentInput'
 import GroupList from '../components/GroupList'
 import BottomSheet from '@gorhom/bottom-sheet';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+// import { useNavigation } from '@react-navigation/native';
 
 //TODO: Update total bill + tip while typing
 //TODO: Update all users when confirming payment
@@ -13,7 +15,28 @@ export default function Payment({ GroupData, IsManager, GroupCode }) {
     const [isReady, setIsReady] = useState(false);
 
     const bottomSheetRef = useRef<BottomSheet>(null);
+    const navigation = useNavigation();
 
+    useFocusEffect(() => {
+        const backAction = () => {
+            Alert.alert('רגע!', 'האם אתה רוצה להתנתק מהקבוצה?', [
+                {
+                    text: 'ביטול',
+                    onPress: () => null,
+                    style: 'cancel',
+                },
+                { text: 'אישור', onPress: () => navigation.navigate('home') },
+            ]);
+            return true;
+        };
+
+        const backHandler = BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction,
+        );
+
+        return () => backHandler.remove();
+    });
 
     const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index);

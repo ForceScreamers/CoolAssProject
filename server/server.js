@@ -153,15 +153,18 @@ io.on('connection', (socket) => {
 
 
     socket.on('disconnect', (reason) => {
-        for (let i = 0; i < connectedUsers.length; i++) {
-            if (connectedUsers[i].id == socket.id) {
-                connectedUsers.splice(i, 1);
-            }
-        }
+        RemoveConnectedUserById(socket.id)
         console.log('a user disconnected', connectedUsers.length);
     })
 });
 
+function RemoveConnectedUserById(id) {
+    for (let i = 0; i < connectedUsers.length; i++) {
+        if (connectedUsers[i].id == id) {
+            connectedUsers.splice(i, 1);
+        }
+    }
+}
 
 
 server.listen(PORT, () => {
