@@ -1,11 +1,9 @@
 import { View, Text, StyleSheet, TextInput } from 'react-native'
 import React, { useEffect, useState } from 'react'
 
-const ERROR_COLOR = '#FF0000'
-const NORMAL_COLOR = '#70AD47'
 
-export default function UserInputAndTitle({ TitleSize, InputSize, SetState, StateValue, Title, Type, MaxLength, PlaceHolder, ShowValidAlert, ...props }) {
 
+export default function UserInputAndTitle({ TitleSize, InputSize, SetState, StateValue, Title, Type, MaxLength, PlaceHolder, FieldColor, ...props }) {
     return (
         <View>
             <Text style={[styles.titleText, { fontSize: TitleSize }]}>{Title}</Text>
@@ -17,7 +15,7 @@ export default function UserInputAndTitle({ TitleSize, InputSize, SetState, Stat
                 onChangeText={input => SetState(input)}
                 placeholder={PlaceHolder}
                 placeholderTextColor={'#7F7F7F'}
-                underlineColorAndroid={ShowValidAlert ? NORMAL_COLOR : ERROR_COLOR}
+                underlineColorAndroid={FieldColor}
                 {...props}
             />
         </View>

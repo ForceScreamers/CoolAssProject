@@ -5,21 +5,38 @@ import { socket } from '../socket';
 import UserInputAndTitle from '../components/UserInputAndTitle';
 import TipInputAndDisplay from '../components/TipInputAndDisplay';
 
+const ERROR_COLOR = '#FF0000'
+const NORMAL_COLOR = '#70AD47'
 
-export default function PaymentInput({ IsManager, IsReady, CollapseSheet }) {
-    const [amount, setAmount] = useState('');
+function isNumeric(str) {
+    if (typeof str != "string") return false // we only process strings!  
+    return !isNaN(Number(str)) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
+        !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
+}
+
+function IsNumberValid(input) {
+    if (isNumeric(input) && input !== '' && input >= 0) {
+        return true;
+    }
+    return false;
+}
+
+export default function PaymentInput({ IsManager, CollapseSheet }) {
+    const [amount, setAmount] = useState(-1);
     const [bill, setBill] = useState('');
 
     const [managerTipValue, setTipValue] = useState(0);
 
-    // TODO: Fix payment input validation!
-    const [amountValid, setAmountValid] = useState(false)
-    const [billValid, setBillValid] = useState(false)
+    const [amountFieldColor, setAmountFieldColor] = useState(NORMAL_COLOR)
+    const [billFieldColor, setBillFieldColor] = useState(NORMAL_COLOR)
 
     function ConfirmPayment() {
-        console.log("amount", amount)
-        setAmountValid(amount === '' ? false : true);
-        setBillValid(bill === '' ? false : true);
+        //  Validate money input
+        let amountValid = IsNumberValid(amount);
+        let billValid = IsNumberValid(bill);
+
+        setAmountFieldColor(amountValid ? NORMAL_COLOR : ERROR_COLOR);
+        setBillFieldColor(billValid ? NORMAL_COLOR : ERROR_COLOR);
 
         if (amountValid && billValid) {
             CollapseSheet();
@@ -29,7 +46,9 @@ export default function PaymentInput({ IsManager, IsReady, CollapseSheet }) {
                 bill: bill,
                 tip: managerTipValue,
             });
-            console.log("Request to server")
+        }
+        else {
+            socket.emit('userNotReady');
         }
     }
 
@@ -50,7 +69,7 @@ export default function PaymentInput({ IsManager, IsReady, CollapseSheet }) {
                         Type='numeric'
                         PlaceHolder='₪0.00'
 
-                        ShowValidAlert={amountValid}
+                        FieldColor={billFieldColor}
                     />
                     <UserInputAndTitle
                         TitleSize={25}
@@ -63,7 +82,7 @@ export default function PaymentInput({ IsManager, IsReady, CollapseSheet }) {
                         Type='numeric'
                         PlaceHolder='₪0.00'
 
-                        ShowValidAlert={billValid}
+                        FieldColor={amountFieldColor}
                     />
                 </View>
 

@@ -5,9 +5,13 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 
+require('dotenv').config();
+
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
+
+const storage = require('node-persist')
 
 app.use(cors())
 
@@ -17,14 +21,21 @@ app.get('/', (req, res) => {
     res.send("HELLO");
 });
 
-// let groups = [];//? Maybe refactore to a better data structure
-let connectedUsers = [];
+storage.init();
+
+storage.setItem('users', [])
+
 
 const NO_USER_FOUND = 0;
 
 let groups = [
     new Group(1)
 ]
+
+//! TODO: swap connectedUsers to the node persist option
+//! TODO: fix node-persist funcitons not working
+// TODO: disconnect all users when a server restarts
+//TODO: Remember groups on server restart
 
 groups[0].AddUser(new User('k1', 0, 0, 0, false))
 groups[0].AddUser(new User('k2', 1, 0, 0, false))
@@ -33,7 +44,6 @@ groups[0].AddUser(new User('k3', 2, 0, 0, true))
 groups[0].users[0].isReady = true;
 groups[0].users[1].isReady = true;
 groups[0].users[2].isReady = true;
-
 
 function GetUserBySocketId(socketId) {
     for (let i = 0; i < connectedUsers.length; i++) {
@@ -81,10 +91,14 @@ function GenerateGroupId() {
 }
 
 
-io.on('connection', (socket) => {
+io.on('connection', async (socket) => {
 
-    connectedUsers.push(new User('k', socket.id, 0, 0, false));
+    let users = await storage.getItem('users')
+    users.push(new User('k', socket.id, 0, 0, false));
+    storage.updateItem('users', users);
+
     console.log('user connected', connectedUsers.length);
+    // console.log()
 
     socket.on('canCreateGroup', (data) => {
         console.log('creating group')
@@ -146,9 +160,18 @@ io.on('connection', (socket) => {
         }
     })
 
+    socket.on('userNotReady', () => {
+        let user = GetUserBySocketId(socket.id);
+        console.log("Not ")
+
+        UpdateUserProp(user, 'isReady', false);
+
+        let group = GetGroupById(user.groupId);
+        socket.emit('updatedGroup', group.users)
+    })
+
     socket.on('leaveGroup', data => {
         UpdateUserProp(user, 'isInAnyGroup', false);
-        //
     })
 
 

@@ -34,6 +34,7 @@ const App = () => {
 
     useEffect(() => {
         function onConnect() {
+            
             setIsConnected(true);
         }
 
