@@ -11,7 +11,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-const storage = require('node-persist')
+const storage = require('./storage/storage')
 
 app.use(cors())
 
@@ -21,9 +21,6 @@ app.get('/', (req, res) => {
     res.send("HELLO");
 });
 
-storage.init();
-
-storage.setItem('users', [])
 
 
 const NO_USER_FOUND = 0;
@@ -95,7 +92,7 @@ io.on('connection', async (socket) => {
 
     let users = await storage.getItem('users')
     users.push(new User('k', socket.id, 0, 0, false));
-    storage.updateItem('users', users);
+    // storage.updateItem('users', users);
 
     console.log('user connected', connectedUsers.length);
     // console.log()
