@@ -1,6 +1,4 @@
-let fs = require('fs');
-
-
+const fs = require('fs');
 
 class Storage {
     constructor(path) {
@@ -8,14 +6,17 @@ class Storage {
     }
 
     init() {
-        fs.writeFileSync(this.path, 'hello!')
+        if (!fs.existsSync(this.path)) {
+            fs.openSync(this.path);
+        }
+
     }
 
     getItem(key) {
 
     }
     setItem(key, value) {
-
+        fs.writeSync(this.path, 'yaaa');
     }
     updateItem(key, value) {
 
@@ -25,4 +26,4 @@ class Storage {
     }
 }
 
-module.exports = Storage;
+module.exports = Storage

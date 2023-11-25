@@ -1,3 +1,4 @@
-const storage = require('./storage')
+const Storage = require('./storage')
 
-storage
+let s = new Storage('./users.json')
+s.init()
