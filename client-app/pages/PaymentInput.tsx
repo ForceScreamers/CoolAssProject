@@ -31,7 +31,7 @@ export default function PaymentInput({ IsManager, CollapseSheet }) {
     const [billFieldColor, setBillFieldColor] = useState(NORMAL_COLOR)
 
     function ConfirmPayment() {
-        //  Validate money input
+        //  Validate money input.
         let amountValid = IsNumberValid(amount);
         let billValid = IsNumberValid(bill);
 
