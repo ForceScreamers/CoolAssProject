@@ -1,9 +1,17 @@
 import { View, Text, Button } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useNavigation } from '@react-navigation/native'
-
-export default function Home() {
+import { socket } from '../socket';
+export default function Home({ IsConnected }) {
     const navigation = useNavigation();
+
+    useEffect(() => {
+        if (IsConnected) {
+            //  Handle reconnect
+            navigation.navigate('home')
+            socket.emit('userReconnect');
+        }
+    }, [IsConnected])
 
     return (
         <View>

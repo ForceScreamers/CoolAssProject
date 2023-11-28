@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler'
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import { NavigationContainer, useNavigation } from '@react-navigation/native'
+import { NavigationContainer } from '@react-navigation/native'
 import Calculator from './Calculator';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { View, Text, StyleSheet, Linking, Alert, Button } from 'react-native';
@@ -32,9 +32,10 @@ const App = () => {
     const [groupCode, setGroupCode] = useState('');
     const [isManager, setIsManager] = useState(false);//* There is also a manager prop in the user on server for redundency
 
+
     useEffect(() => {
         function onConnect() {
-            
+
             setIsConnected(true);
         }
 
@@ -77,9 +78,14 @@ const App = () => {
 
                 <Stack.Navigator initialRouteName='home' screenOptions={{ animation: 'fade', headerShown: false, contentStyle: { backgroundColor: '#606060' } }}>
 
-                    <Stack.Screen name='home'>{() => <Home />}</Stack.Screen>
+                    <Stack.Screen name='home'>{() => <Home IsConnected={isConnected} />}</Stack.Screen>
 
-                    <Stack.Screen name='payment'>{() => <Payment GroupData={groupList} IsManager={isManager} GroupCode={groupCode} />}</Stack.Screen>
+                    <Stack.Screen name='payment'>{() =>
+                        <Payment
+                            GroupData={groupList}
+                            IsManager={isManager}
+                            GroupCode={groupCode}
+                        />}</Stack.Screen>
                     <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
                     <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
 

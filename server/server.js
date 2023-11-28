@@ -5,13 +5,10 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 
-require('dotenv').config();
-
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
-const storage = require('./storage/storage')
 
 app.use(cors())
 
@@ -29,9 +26,6 @@ let groups = [
     new Group(1)
 ]
 
-//! TODO: swap connectedUsers to the node persist option
-//! TODO: fix node-persist funcitons not working
-// TODO: disconnect all users when a server restarts
 //TODO: Remember groups on server restart
 
 groups[0].AddUser(new User('k1', 0, 0, 0, false))
@@ -50,7 +44,7 @@ function GetUserBySocketId(socketId) {
     }
     return NO_USER_FOUND;
 }
-
+let connectedUsers = []
 /**
  * Used to update a property of an existing user.
  * Because parameters are passed by value, we need to find the original object within the list of users and update it's propery directly.
@@ -90,9 +84,9 @@ function GenerateGroupId() {
 
 io.on('connection', async (socket) => {
 
-    let users = await storage.getItem('users')
-    users.push(new User('k', socket.id, 0, 0, false));
-    // storage.updateItem('users', users);
+    // let users = await storage.getItem('users')
+
+    connectedUsers.push(new User('k', socket.id, 0, 0, false));
 
     console.log('user connected', connectedUsers.length);
     // console.log()
@@ -168,7 +162,15 @@ io.on('connection', async (socket) => {
     })
 
     socket.on('leaveGroup', data => {
+        console.log('leaving group')
+        let user = GetUserBySocketId(socket.id);
+
         UpdateUserProp(user, 'isInAnyGroup', false);
+    })
+
+    socket.on('userReconnect', () => {
+        //TODO:  Join the group that the user was in before reconnection, if they were in a group
+        //TODO: connect to database
     })
 
 

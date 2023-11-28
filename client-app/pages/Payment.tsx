@@ -5,17 +5,22 @@ import GroupList from '../components/GroupList'
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 // import { useNavigation } from '@react-navigation/native';
+import { socket } from '../socket';
 
 //TODO: Update total bill + tip while typing
 //TODO: Update all users when confirming payment
 //TODO: Change layout for manager and normal user
-
 
 export default function Payment({ GroupData, IsManager, GroupCode }) {
     const [isReady, setIsReady] = useState(false);
 
     const bottomSheetRef = useRef<BottomSheet>(null);
     const navigation = useNavigation();
+
+    function LeaveGroup() {
+        socket.emit('leaveGroup');
+        navigation.navigate('home');
+    }
 
     useFocusEffect(() => {
         const backAction = () => {
@@ -25,7 +30,7 @@ export default function Payment({ GroupData, IsManager, GroupCode }) {
                     onPress: () => null,
                     style: 'cancel',
                 },
-                { text: 'אישור', onPress: () => navigation.navigate('home') },
+                { text: 'אישור', onPress: () => LeaveGroup() },
             ]);
             return true;
         };
