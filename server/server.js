@@ -9,6 +9,8 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
+// const { connectToDb, getDb } = require('./database/db')
+
 
 app.use(cors())
 
@@ -44,12 +46,14 @@ function GetUserBySocketId(socketId) {
     }
     return NO_USER_FOUND;
 }
+
 let connectedUsers = []
-/**
- * Used to update a property of an existing user.
- * Because parameters are passed by value, we need to find the original object within the list of users and update it's propery directly.
- */
+
 function UpdateUserProp(user, prop, value) {
+    /**
+     * Used to update a property of an existing user.
+     * Because parameters are passed by value, we need to find the original object within the list of users and update it's propery directly.
+     */
     let connectedUserIndex = connectedUsers.map(connectedUser => connectedUser.id).indexOf(user.id)
 
     if (connectedUserIndex !== -1) {
@@ -84,12 +88,9 @@ function GenerateGroupId() {
 
 io.on('connection', async (socket) => {
 
-    // let users = await storage.getItem('users')
-
     connectedUsers.push(new User('k', socket.id, 0, 0, false));
 
     console.log('user connected', connectedUsers.length);
-    // console.log()
 
     socket.on('canCreateGroup', (data) => {
         console.log('creating group')
