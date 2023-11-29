@@ -28,15 +28,12 @@ let groups = [
     new Group(1)
 ]
 
-//TODO: Remember groups on server restart
+//? TODO: Remember groups on server restart
+//TODO: Implement user id system
 
-groups[0].AddUser(new User('k1', 0, 0, 0, false))
-groups[0].AddUser(new User('k2', 1, 0, 0, false))
-groups[0].AddUser(new User('k3', 2, 0, 0, true))
+groups[0].AddUser(new User('Kfir1', 0, 100, 100, true))
 
 groups[0].users[0].isReady = true;
-groups[0].users[1].isReady = true;
-groups[0].users[2].isReady = true;
 
 function GetUserBySocketId(socketId) {
     for (let i = 0; i < connectedUsers.length; i++) {
@@ -148,6 +145,7 @@ io.on('connection', async (socket) => {
 
         if (group.IsReady()) {
             //TODO:  Calculate all
+            group.CalculateChangeForAll()
             console.log('group ready!')
         }
     })

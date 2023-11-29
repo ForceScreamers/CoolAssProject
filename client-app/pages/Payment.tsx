@@ -70,6 +70,7 @@ export default function Payment({ GroupData, IsManager, GroupCode }) {
             <Text>{IsManager ? `קוד הצטרפות: ${GroupCode}` : ''}</Text>
 
             <View style={{ flex: 1 }}>
+
                 <GroupList Members={GroupData} />
             </View>
 

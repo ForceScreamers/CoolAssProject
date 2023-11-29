@@ -6,9 +6,9 @@ const awaitingImage = require('../assets/awaiting.png')
 const crownImage = require('../assets/crown.png')
 
 
-export default function GroupListMember({ Change, IsReady, Name, IsManager }) {
+export default function GroupListMember({ Index, Bill, Amount, Change, IsReady, Name, IsManager }) {
     // ? Maybe add Bill & Amount
-    const nameSize = (160 / Name.length)
+    const nameSize = (100 / Name.length)
 
     function DisplayCrown() {
         if (IsManager) {
@@ -26,7 +26,25 @@ export default function GroupListMember({ Change, IsReady, Name, IsManager }) {
                 <Text adjustsFontSizeToFit style={[styles.cell, { fontSize: nameSize }]}>{Name}</Text>
             </View>
             <Text style={styles.cell}>|</Text>
-            <Text style={styles.cell}>{Change}</Text>
+
+            {/* TODO: Turn this into compenent */}
+            {
+                Index == 0
+                    ?
+                    <View style={styles.cell}>
+                        <Text style={styles.cellHeaders}>חשבון</Text>
+                        <Text style={styles.cellText}>{Change}</Text>
+                    </View>
+                    :
+                    <View style={styles.cell}>
+                        <Text style={styles.cellText}>{Change}</Text>
+                    </View>
+            }
+
+            <Text style={styles.cell}>|</Text>
+            <Text style={styles.cell}>{Bill}</Text>
+            <Text style={styles.cell}>|</Text>
+            <Text style={styles.cell}>{Amount}</Text>
             <Text style={styles.cell}>|</Text>
 
             <Image source={IsReady ? checkImage : awaitingImage} style={styles.icon} />
@@ -52,7 +70,18 @@ const styles = StyleSheet.create({
         borderRadius: 2,
         padding: 10,
         textAlignVertical: 'center',
-        fontSize: 25,
+        fontSize: 20,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    cellHeaders: {
+        color: 'black',
+        paddingBottom: 0
+    },
+    cellText: {
+        color: 'black',
+        fontSize: 20
     },
     icon: {
         width: 25,
