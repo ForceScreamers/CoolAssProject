@@ -4,22 +4,29 @@ const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
+const Helper = require('./database/helper');
+
 
 const app = express();
 const server = createServer(app);
 const io = new Server(server);
-
-// const { connectToDb, getDb } = require('./database/db')
 
 
 app.use(cors())
 
 const PORT = 3000
 
+server.listen(PORT)
+
+
 app.get('/', (req, res) => {
     res.send("HELLO");
 });
 
+
+app.get('/users', (req, res) => {
+    Helper.GetUsers().then(data => console.log(data))
+})
 
 
 const NO_USER_FOUND = 0;
@@ -188,9 +195,6 @@ function RemoveConnectedUserById(id) {
 }
 
 
-server.listen(PORT, () => {
-    console.log(`server running at http://localhost:${PORT}`);
-});
 
 
 
