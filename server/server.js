@@ -25,22 +25,16 @@ app.get('/', (req, res) => {
 
 
 app.get('/users', (req, res) => {
-    Helper.GetUsers().then(data => console.log(data))
+    // Helper.GetUsers().then(data => console.log(data))
+    Helper.RemoveUserFromGroup("6569c41c4b44a4eb21963617", "656b0ab8e1145356099c34b1")
 })
 
 
 const NO_USER_FOUND = 0;
 
-let groups = [
-    new Group(1)
-]
-
 //? TODO: Remember groups on server restart
 //TODO: Implement user id system
-
-groups[0].AddUser(new User('Kfir1', 0, 100, 100, true))
-
-groups[0].users[0].isReady = true;
+// TODO: Create signup page with username!
 
 function GetUserBySocketId(socketId) {
     for (let i = 0; i < connectedUsers.length; i++) {
@@ -99,6 +93,8 @@ io.on('connection', async (socket) => {
     socket.on('canCreateGroup', (data) => {
         console.log('creating group')
         let user = GetUserBySocketId(socket.id);
+
+
         let groupId;
         if (user.isInAnyGroup == false) {
             groupId = CreateGroupFor(user);
