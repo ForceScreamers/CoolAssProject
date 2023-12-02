@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
 
 app.get('/users', (req, res) => {
     // Helper.GetUsers().then(data => console.log(data))
-    Helper.RemoveUserFromGroup("6569c41c4b44a4eb21963617", "656b0ab8e1145356099c34b1")
+    Helper.CreateGroupForUser("6569c41c4b44a4eb21963617").then(data => console.log(data))
 })
 
 
@@ -86,24 +86,20 @@ function GenerateGroupId() {
 
 io.on('connection', async (socket) => {
 
-    connectedUsers.push(new User('k', socket.id, 0, 0, false));
+    // Send the client it's user id
 
-    console.log('user connected', connectedUsers.length);
+    // socket.emit('userInitialize', {userId: })
+
 
     socket.on('canCreateGroup', (data) => {
         console.log('creating group')
-        let user = GetUserBySocketId(socket.id);
+        // let user = GetUserBySocketId(socket.id);
 
 
-        let groupId;
-        if (user.isInAnyGroup == false) {
-            groupId = CreateGroupFor(user);
+        let groupId = Helper.CreateGroupForUser(data.userId)
 
-            let emitData = {
-                groupCode: groupId
-            }
-
-            socket.emit('createdGroup', emitData);
+        if (groupId) {
+            socket.emit('createdGroup', { groupCode: groupId });
         }
         else {
             socket.emit('cantCreateGroup');
@@ -111,6 +107,12 @@ io.on('connection', async (socket) => {
     })
 
     socket.on('canJoinGroup', data => {
+
+
+        Helper.AddUserToGroupByCode(data.userId, data.groupCode)
+
+
+
         let user = GetUserBySocketId(socket.id);
         let group = GetGroupById(data.groupId);
 
@@ -144,6 +146,7 @@ io.on('connection', async (socket) => {
 
         let group = GetGroupById(user.groupId);
 
+        // TODO: Change all 'updatedGroup' to get the group data from the database
         socket.emit('updatedGroup', group.users)
 
         if (group.IsReady()) {
