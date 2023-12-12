@@ -108,29 +108,18 @@ io.on('connection', async (socket) => {
 
     socket.on('canJoinGroup', data => {
 
+        if (Helper.IsUserInAnyGroup(data.userId) === false) {
+            Helper.AddUserToGroupByCode(data.userId, data.groupCode)
 
-        Helper.AddUserToGroupByCode(data.userId, data.groupCode)
-
-
-
-        let user = GetUserBySocketId(socket.id);
-        let group = GetGroupById(data.groupId);
-
-        if (user.isInAnyGroup === false && group !== undefined) {
-            console.log('joined group')
-            UpdateUserProp(user, 'isInAnyGroup', true);
-            UpdateUserProp(user, 'groupId', group.id);
-
-            group.AddUser(user);
 
             let emitData = JSON.stringify(
                 groups[0].users
             )
             socket.emit('joinedGroup', emitData)
+
         }
         else {
             socket.emit('groupNotFound');
-            console.log("not found");
         }
     })
 

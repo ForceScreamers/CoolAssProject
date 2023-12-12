@@ -57,16 +57,13 @@ module.exports = {
             })
     },
     AddUserToGroupByCode: async function (userId, groupCode) {
-        //  A bit confusing, this is a wrapper function that simply finds the group id by the code
 
-        let groupId = this.GetGroupIdByCode(groupCode)
-        this.AddUserToGroupById(userId, groupId);
-    },
-    GetGroupIdByCode: async function (groupCode) {
+        // Get group id by group code
         let groupId = await db.collection("groups")
             .find({ code: groupCode }, { _id: 1 })
             .catch(err => console.log(err))
-        return groupId;
+
+        this.AddUserToGroupById(userId, groupId);
     },
     RemoveUserFromGroup: async function (userId, groupId) {
 
@@ -120,6 +117,10 @@ module.exports = {
 
         return groupId;
     },
+    GetGroupByUser: async function (userId) {
+        let group = await db.collection("groups")
+            .find({})
+    }
 
 
 }
