@@ -84,11 +84,31 @@ function GenerateGroupId() {
 }
 
 
-io.on('connection', async (socket) => {
+io.on('connection', (socket) => {
 
     // Send the client it's user id
-
+    console.log("user connected")
     // socket.emit('userInitialize', {userId: })
+    // Init new user
+    // let { userExists, userId } = await Helper.AddUser('default_username :3');
+
+    // Try to get user id
+    // If there is no user id, create new user and ask for username
+
+
+    Helper.AddUser().then((userId) => {
+        console.log("data:")
+        // console.log(val.user_exists, val.user_id);
+
+        socket.emit('updateId', { userId: userId })
+    })
+
+    socket.on('updateUsername', async data => {
+        //...
+        console.log(data.userId, data.username)
+        Helper.UpdateUsername(data.userId, data.username)
+    })
+
 
 
     socket.on('canCreateGroup', (data) => {
@@ -168,7 +188,8 @@ io.on('connection', async (socket) => {
     })
 
 
-    socket.on('disconnect', (reason) => {
+    socket.once('disconnect', (reason) => {
+        console.log(reason)
         RemoveConnectedUserById(socket.id)
         console.log('a user disconnected', connectedUsers.length);
     })

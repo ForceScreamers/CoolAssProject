@@ -32,17 +32,38 @@ module.exports = {
             })
         return users;
     },
-    AddUser: async function (username) {
+    RegisterUser: async function (username) {
+
+    },
+    UsernameIsExists: async function (username) {
+        // Check if exists
+        let userCount = await db.collection("users")
+            .count({
+                username: username
+            })
+            .catch(err => console.log(err))
+        return userCount == 0
+    },
+    AddUser: async function () {
+        //  Add user
+        let userId;
+
         await db.collection("users")
             .insertOne({
-                username: username,
+                username: '',
                 amount: 0,
                 bill: 0,
                 change: 0,
                 is_manager: false,
                 is_ready: false
             })
+            .then(result => {
+                userId = result.insertedId;
+            })
             .catch(err => console.log(err))
+
+        return userId;
+
     },
 
     // TODO: add group not found
@@ -120,6 +141,10 @@ module.exports = {
     GetGroupByUser: async function (userId) {
         let group = await db.collection("groups")
             .find({})
+    },
+    UpdateUsername: async function (userId, newUsername) {
+        await db.collection("users")
+            .updateOne({ _id: new ObjectId(userId) }, { $set: { username: newUsername } })
     }
 
 

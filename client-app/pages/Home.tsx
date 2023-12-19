@@ -16,6 +16,7 @@ export default function Home({ IsConnected }) {
     return (
         <View>
             <Text>בית</Text>
+            <Button onPress={() => navigation.navigate('editDisplayName')} title="שנה שם" />
             <Button onPress={() => navigation.navigate('hostEvent')} title="צור אירוע" />
             <Button onPress={() => navigation.navigate('joinEvent')} title="הצטרף לאירוע" />
         </View>

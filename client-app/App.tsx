@@ -15,22 +15,34 @@ import { socket } from './socket'
 import Home from './pages/Home';
 import Payment from './pages/Payment';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import EditDisplayName from './pages/EditDisplayName';
 
+import { StoreUserId } from './storage';
 const Stack = createNativeStackNavigator();
 
 const linking = {
     prefixes: ['app://']
 }
 
+// TODO: Add display name and edit display name. don't need a register or login because the users will join via link, not by request!
+// TODO: if there is no name, ask the user to choose a name.
+
+
 const App = () => {
     const [isConnected, setIsConnected] = useState(socket.connected);
 
     const [groupList, setGroupList] = useState([]);
-    // const [userId, setUserId] = useState('')
 
 
     const [groupCode, setGroupCode] = useState('');
     const [isManager, setIsManager] = useState(false);//* There is also a manager prop in the user on server for redundency
+
+
+
+    useEffect(() => {
+        // socket.emit('register', { username: "Yossi" })
+    }, [])
+
 
 
     useEffect(() => {
@@ -40,6 +52,8 @@ const App = () => {
         }
 
         function onDisconnect() {
+            console.log("EEE")
+            socket.emit('userDisconnect', "yaaa")
             setIsConnected(false);
         }
 
@@ -54,11 +68,16 @@ const App = () => {
         socket.on('createdGroup', data => {
             setGroupCode(data.groupCode);
             setIsManager(true);
-            console.log(data);
+            // console.log(data);
         })
 
         socket.on('updatedGroup', data => {
             setGroupList(data)
+        })
+
+        socket.on('updateId', async data => {
+            StoreUserId(data.userId)
+            // console.log(await GetUserId())
         })
 
 
@@ -68,6 +87,7 @@ const App = () => {
             socket.off('disconnect', onDisconnect);
 
             socket.off('joinedGroup');
+            // TODO Check what and how to use socket off
         }
     }, [socket])
 
@@ -88,6 +108,7 @@ const App = () => {
                         />}</Stack.Screen>
                     <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
                     <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
+                    <Stack.Screen name='editDisplayName'>{() => <EditDisplayName />}</Stack.Screen>
 
                 </Stack.Navigator>
             </NavigationContainer>
