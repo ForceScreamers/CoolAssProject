@@ -17,7 +17,7 @@ import Payment from './pages/Payment';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import EditDisplayName from './pages/EditDisplayName';
 
-import { StoreUserId } from './storage';
+import { GetUserId, StoreUserId } from './storage';
 const Stack = createNativeStackNavigator();
 
 const linking = {
@@ -26,7 +26,7 @@ const linking = {
 
 // TODO: Add display name and edit display name. don't need a register or login because the users will join via link, not by request!
 // TODO: if there is no name, ask the user to choose a name.
-
+// TODO: Encrypt client stored userId as token.
 
 const App = () => {
     const [isConnected, setIsConnected] = useState(socket.connected);
@@ -37,7 +37,7 @@ const App = () => {
     const [groupCode, setGroupCode] = useState('');
     const [isManager, setIsManager] = useState(false);//* There is also a manager prop in the user on server for redundency
 
-
+    const [hasUserId, setHasUserId] = useState(false)
 
     useEffect(() => {
         // socket.emit('register', { username: "Yossi" })
@@ -46,19 +46,30 @@ const App = () => {
 
 
     useEffect(() => {
-        function onConnect() {
-
+        async function onConnect() {
+            let userId = await GetUserId();
+            console.log(userId)
+            if (userId == null) {
+                socket.emit('requestInit')
+                // TODO: Prompt "choose username"
+                setHasUserId(false)
+            }
+            else {
+                setHasUserId(true)
+            }
             setIsConnected(true);
         }
 
         function onDisconnect() {
-            console.log("EEE")
-            socket.emit('userDisconnect', "yaaa")
             setIsConnected(false);
         }
 
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
+
+        socket.on('updateId', async data => {
+            StoreUserId(data.userId)
+        })
 
         socket.on('joinedGroup', data => {
             setGroupList(JSON.parse(data));
@@ -75,10 +86,7 @@ const App = () => {
             setGroupList(data)
         })
 
-        socket.on('updateId', async data => {
-            StoreUserId(data.userId)
-            // console.log(await GetUserId())
-        })
+
 
 
 
@@ -91,27 +99,38 @@ const App = () => {
         }
     }, [socket])
 
+    async function GetInitialRouteName() {
+        if (await GetUserId() == null) {
+            return "editDisplayName"
+        }
+        else {
+            return "home"
+        }
+    }
+
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <NavigationContainer linking={linking} >
+            <>
+                {(<NavigationContainer linking={linking} >
 
-                <Stack.Navigator initialRouteName='home' screenOptions={{ animation: 'fade', headerShown: false, contentStyle: { backgroundColor: '#606060' } }}>
+                    <Stack.Navigator initialRouteName={hasUserId ? "home" : "editDisplayName"} screenOptions={{ animation: 'fade', headerShown: false, contentStyle: { backgroundColor: '#606060' } }}>
 
-                    <Stack.Screen name='home'>{() => <Home IsConnected={isConnected} />}</Stack.Screen>
+                        <Stack.Screen name='home'>{() => <Home IsConnected={isConnected} />}</Stack.Screen>
 
-                    <Stack.Screen name='payment'>{() =>
-                        <Payment
-                            GroupData={groupList}
-                            IsManager={isManager}
-                            GroupCode={groupCode}
-                        />}</Stack.Screen>
-                    <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
-                    <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
-                    <Stack.Screen name='editDisplayName'>{() => <EditDisplayName />}</Stack.Screen>
+                        <Stack.Screen name='payment'>{() =>
+                            <Payment
+                                GroupData={groupList}
+                                IsManager={isManager}
+                                GroupCode={groupCode}
+                            />}</Stack.Screen>
+                        <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
+                        <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
+                        <Stack.Screen name='editDisplayName'>{() => <EditDisplayName />}</Stack.Screen>
 
-                </Stack.Navigator>
-            </NavigationContainer>
+                    </Stack.Navigator>
+                </NavigationContainer>)}
+            </>
         </GestureHandlerRootView>
     )
 };

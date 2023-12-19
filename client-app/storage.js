@@ -20,7 +20,7 @@ export async function GetUserId() {
         }
         else {
             console.log("cant resolve promise")
-            return -1
+            return null
         }
     } catch (e) {
         console.log(e)

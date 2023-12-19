@@ -94,14 +94,19 @@ io.on('connection', (socket) => {
 
     // Try to get user id
     // If there is no user id, create new user and ask for username
+    socket.on('requestInit', () => {
+        // if (Helper.UserIsExists(userId) == false) {
+        console.log("requested init")
+        Helper.AddUser().then((userId) => {
+            console.log("data:")
+            // console.log(val.user_exists, val.user_id);
 
-
-    Helper.AddUser().then((userId) => {
-        console.log("data:")
-        // console.log(val.user_exists, val.user_id);
-
-        socket.emit('updateId', { userId: userId })
+            socket.emit('updateId', { userId: userId })
+        })
+        // }
     })
+
+
 
     socket.on('updateUsername', async data => {
         //...

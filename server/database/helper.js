@@ -35,11 +35,11 @@ module.exports = {
     RegisterUser: async function (username) {
 
     },
-    UsernameIsExists: async function (username) {
+    UserIsExists: async function (userId) {
         // Check if exists
         let userCount = await db.collection("users")
             .count({
-                username: username
+                _id: new ObjectId(userId)
             })
             .catch(err => console.log(err))
         return userCount == 0
