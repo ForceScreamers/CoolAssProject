@@ -1,10 +1,7 @@
 import 'react-native-gesture-handler'
-import React, { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native'
-import Calculator from './Calculator';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { View, Text, StyleSheet, Linking, Alert, Button } from 'react-native';
 
 
 //  Screens

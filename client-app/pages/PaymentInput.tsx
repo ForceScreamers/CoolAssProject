@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, TextInput, Button, Pressable } from 'react-native';
 import { socket } from '../socket';

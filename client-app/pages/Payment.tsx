@@ -1,10 +1,9 @@
 import { View, Text, FlatList, Button, StyleSheet, Pressable, Keyboard, Alert, BackHandler } from 'react-native'
-import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback } from 'react'
 import PaymentInput from './PaymentInput'
 import GroupList from '../components/GroupList'
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-// import { useNavigation } from '@react-navigation/native';
 import { socket } from '../socket';
 
 //TODO: Update total bill + tip while typing
