@@ -24,6 +24,12 @@ const linking = {
     prefixes: ['app://']
 }
 
+enum Auth {
+    Loading,
+    HasId,
+    NoId
+}
+
 // TODO: Add display name and edit display name. don't need a register or login because the users will join via link, not by request!
 // TODO: if there is no name, ask the user to choose a name.
 // TODO: Encrypt client stored userId as token.
@@ -37,11 +43,8 @@ const App = () => {
     const [groupCode, setGroupCode] = useState('');
     const [isManager, setIsManager] = useState(false);//* There is also a manager prop in the user on server for redundency
 
-    const [hasUserId, setHasUserId] = useState(false)
+    const [hasUserId, setHasUserId] = useState(Auth.Loading)
 
-    useEffect(() => {
-        // socket.emit('register', { username: "Yossi" })
-    }, [])
 
 
 
@@ -50,12 +53,12 @@ const App = () => {
             let userId = await GetUserId();
             console.log(userId)
             if (userId == null) {
-                socket.emit('requestInit')
+                // Only when the username is valid, add the user to the db
                 // TODO: Prompt "choose username"
-                setHasUserId(false)
+                setHasUserId(Auth.NoId)
             }
             else {
-                setHasUserId(true)
+                setHasUserId(Auth.HasId)
             }
             setIsConnected(true);
         }
@@ -112,11 +115,11 @@ const App = () => {
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <>
-                {(<NavigationContainer linking={linking} >
+                {hasUserId !== Auth.Loading && (<NavigationContainer linking={linking} >
 
-                    <Stack.Navigator initialRouteName={hasUserId ? "home" : "editDisplayName"} screenOptions={{ animation: 'fade', headerShown: false, contentStyle: { backgroundColor: '#606060' } }}>
+                    <Stack.Navigator initialRouteName={hasUserId === Auth.HasId ? "home" : "editDisplayName"} screenOptions={{ animation: 'fade', headerShown: false, contentStyle: { backgroundColor: '#606060' } }}>
 
-                        <Stack.Screen name='home'>{() => <Home IsConnected={isConnected} />}</Stack.Screen>
+                        <Stack.Screen name='home'>{() => <Home IsConnected={isConnected} HasUserId={hasUserId} />}</Stack.Screen>
 
                         <Stack.Screen name='payment'>{() =>
                             <Payment
@@ -126,7 +129,7 @@ const App = () => {
                             />}</Stack.Screen>
                         <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
                         <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
-                        <Stack.Screen name='editDisplayName'>{() => <EditDisplayName />}</Stack.Screen>
+                        <Stack.Screen name='editDisplayName'>{() => <EditDisplayName Auth={Auth} HasUserId={hasUserId} SetHasUserId={setHasUserId} />}</Stack.Screen>
 
                     </Stack.Navigator>
                 </NavigationContainer>)}

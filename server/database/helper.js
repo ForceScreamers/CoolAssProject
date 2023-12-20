@@ -44,13 +44,13 @@ module.exports = {
             .catch(err => console.log(err))
         return userCount == 0
     },
-    AddUser: async function () {
+    AddNewUser: async function (username) {
         //  Add user
         let userId;
 
         await db.collection("users")
             .insertOne({
-                username: '',
+                username: username,
                 amount: 0,
                 bill: 0,
                 change: 0,

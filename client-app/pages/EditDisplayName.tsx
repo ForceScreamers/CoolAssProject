@@ -5,17 +5,37 @@ import GoBackButton from '../components/GoBackButton'
 import helper from '../../server/database/helper'
 import { socket } from '../socket'
 import { GetUserId } from '../storage'
+import { useNavigation } from '@react-navigation/native'
 
-export default function EditDisplayName() {
+export default function EditDisplayName({ Auth, HasUserId, SetHasUserId }) {
     // TODO: Validate name (without special characters and stuff)
     const MAX_NAME_LENGTH = 30
-    const [displayName, setDisplayName] = useState('')
+    const [username, setUsername] = useState('')
+    const navigation = useNavigation();
 
 
-    async function UpdateDisplayName() {
-        // Update username in database
-        socket.emit('updateUsername', { userId: await GetUserId(), username: displayName })
+    async function UpdateUsername() {
+        console.log("hasUserId", HasUserId)
+        // First time updating username
+        if (HasUserId === Auth.NoId) {
+            console.log(username)
+            socket.emit('createNewUser', { username: username }, () => {
+                console.log('proceed to app!')
+                SetHasUserId(Auth.HasId)
+                navigation.navigate('home')
+            })
+        }
+        else if (HasUserId === Auth.HasId) {// Any other time 
+            let userId = await GetUserId()
+            console.log(username)
+            socket.emit('updateUsername',
+                {
+                    userId: userId,
+                    username: username
+                })
+        }
     }
+
 
     return (
         <View>
@@ -25,12 +45,12 @@ export default function EditDisplayName() {
 
                 // style={[styles.textField, { fontSize: InputSize }]}
                 maxLength={MAX_NAME_LENGTH}
-                onChangeText={input => setDisplayName(input)}
+                onChangeText={input => setUsername(input)}
                 placeholder={"משהו יצירתי..."}
                 placeholderTextColor={'#7F7F7F'}
                 underlineColorAndroid={'#00FF00'}
             />
-            <Button title="אישור" onPress={UpdateDisplayName} />
+            <Button title="אישור" onPress={UpdateUsername} />
         </View>
     )
 }
