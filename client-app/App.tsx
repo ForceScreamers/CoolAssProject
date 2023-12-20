@@ -15,7 +15,7 @@ import { socket } from './socket'
 import Home from './pages/Home';
 import Payment from './pages/Payment';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import EditDisplayName from './pages/EditDisplayName';
+import EditUsername from './pages/EditDisplayName';
 
 import { GetUserId, StoreUserId } from './storage';
 const Stack = createNativeStackNavigator();
@@ -31,15 +31,12 @@ enum Auth {
 }
 
 // TODO: Add display name and edit display name. don't need a register or login because the users will join via link, not by request!
-// TODO: if there is no name, ask the user to choose a name.
 // TODO: Encrypt client stored userId as token.
 
 const App = () => {
     const [isConnected, setIsConnected] = useState(socket.connected);
 
     const [groupList, setGroupList] = useState([]);
-
-
     const [groupCode, setGroupCode] = useState('');
     const [isManager, setIsManager] = useState(false);//* There is also a manager prop in the user on server for redundency
 
@@ -51,10 +48,9 @@ const App = () => {
     useEffect(() => {
         async function onConnect() {
             let userId = await GetUserId();
-            console.log(userId)
+
+            // If the id is null it means that the app is loaded for the first time
             if (userId == null) {
-                // Only when the username is valid, add the user to the db
-                // TODO: Prompt "choose username"
                 setHasUserId(Auth.NoId)
             }
             else {
@@ -82,14 +78,11 @@ const App = () => {
         socket.on('createdGroup', data => {
             setGroupCode(data.groupCode);
             setIsManager(true);
-            // console.log(data);
         })
 
         socket.on('updatedGroup', data => {
             setGroupList(data)
         })
-
-
 
 
 
@@ -102,15 +95,6 @@ const App = () => {
         }
     }, [socket])
 
-    async function GetInitialRouteName() {
-        if (await GetUserId() == null) {
-            return "editDisplayName"
-        }
-        else {
-            return "home"
-        }
-    }
-
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
@@ -119,7 +103,7 @@ const App = () => {
 
                     <Stack.Navigator initialRouteName={hasUserId === Auth.HasId ? "home" : "editDisplayName"} screenOptions={{ animation: 'fade', headerShown: false, contentStyle: { backgroundColor: '#606060' } }}>
 
-                        <Stack.Screen name='home'>{() => <Home IsConnected={isConnected} HasUserId={hasUserId} />}</Stack.Screen>
+                        <Stack.Screen name='home'>{() => <Home IsConnected={isConnected} />}</Stack.Screen>
 
                         <Stack.Screen name='payment'>{() =>
                             <Payment
@@ -129,7 +113,7 @@ const App = () => {
                             />}</Stack.Screen>
                         <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
                         <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
-                        <Stack.Screen name='editDisplayName'>{() => <EditDisplayName Auth={Auth} HasUserId={hasUserId} SetHasUserId={setHasUserId} />}</Stack.Screen>
+                        <Stack.Screen name='editDisplayName'>{() => <EditUsername Auth={Auth} HasUserId={hasUserId} SetHasUserId={setHasUserId} />}</Stack.Screen>
 
                     </Stack.Navigator>
                 </NavigationContainer>)}

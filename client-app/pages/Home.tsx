@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { socket } from '../socket';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-export default function Home({ IsConnected, HasUserId }) {
+export default function Home({ IsConnected }) {
     const navigation = useNavigation();
 
 

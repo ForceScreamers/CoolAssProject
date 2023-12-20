@@ -94,24 +94,21 @@ io.on('connection', (socket) => {
 
     // Try to get user id
     // If there is no user id, create new user and ask for username
-    socket.on('createNewUser', async (data, cb) => {
+    socket.on('createNewUser', async (data, proceedToHome) => {
         console.log("creating new user...")
-
-        // TODO: Validate username
         console.log("username", data.username)
+
+        // TODO: Validate username and send message accordingly
         if (data.username !== '') {
             let userId = await Helper.AddNewUser(data.username)
 
             socket.emit('updateId', { userId: userId })
-            cb()
+            proceedToHome()
         }
     })
 
 
-
-
     socket.on('updateUsername', async data => {
-        //...
         console.log(data.userId, data.username)
         Helper.UpdateUsername(data.userId, data.username)
     })
