@@ -4,14 +4,16 @@ import React, { useEffect, useState } from 'react'
 import { socket } from '../socket'
 import GoBackButton from '../components/GoBackButton';
 import { useNavigation } from '@react-navigation/native';
+import { GetUserId } from '../storage';
 
 export default function JoinEvent() {
     const [input, setInput] = useState('');
     const navigation = useNavigation();
 
-    function RequestJoinGroup() {
-        socket.emit('canJoinGroup', {
-            groupId: parseInt(input)
+    async function RequestJoinGroup() {
+        socket.emit('requestJoinGroup', {
+            userId: await GetUserId(),
+            groupCode: parseInt(input)
         })
     }
 

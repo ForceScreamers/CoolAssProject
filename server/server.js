@@ -130,19 +130,20 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('canJoinGroup', data => {
-
-        if (Helper.IsUserInAnyGroup(data.userId) === false) {
+    socket.on('requestJoinGroup', async data => {
+        // console.log(await Helper.IsUserInAnyGroup('6569c41c4b44a4eb21963617'))
+        if (await Helper.IsUserInAnyGroup(data.userId) === false) {
             Helper.AddUserToGroupByCode(data.userId, data.groupCode)
 
+            let group = await Helper.GetGroupByUser(data.userId);
+            console.log(data.userId)
+            socket.emit('updateGroup', { group: group })
 
-            let emitData = JSON.stringify(
-                groups[0].users
-            )
-            socket.emit('joinedGroup', emitData)
+            socket.emit('joinedGroup')
 
         }
         else {
+            console.log("not found")
             socket.emit('groupNotFound');
         }
     })

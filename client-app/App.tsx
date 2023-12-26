@@ -27,8 +27,10 @@ enum Auth {
     NoId
 }
 
-// TODO: Add display name and edit display name. don't need a register or login because the users will join via link, not by request!
+
 // TODO: Encrypt client stored userId as token.
+
+// TODO: Add page wrapper that shows menu with: profile details, settings, history...
 
 const App = () => {
     const [isConnected, setIsConnected] = useState(socket.connected);

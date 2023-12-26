@@ -82,7 +82,7 @@ module.exports = {
         // Get group id by group code
         let groupId = await db.collection("groups")
             .find({ code: groupCode }, { _id: 1 })
-            .catch(err => console.log(err))
+        // .catch(err => console.log(err))
 
         this.AddUserToGroupById(userId, groupId);
     },
@@ -104,7 +104,7 @@ module.exports = {
             })
             .catch(err => console.log(err))
 
-        if (userCount == 0) {
+        if (userCount > 0) {
             return true;
         } else {
             return false;
@@ -140,7 +140,10 @@ module.exports = {
     },
     GetGroupByUser: async function (userId) {
         let group = await db.collection("groups")
-            .find({})
+            .find({
+                user_ids: { $in: [new ObjectId(userId)] }
+            })
+        return group;
     },
     UpdateUsername: async function (userId, newUsername) {
         await db.collection("users")
