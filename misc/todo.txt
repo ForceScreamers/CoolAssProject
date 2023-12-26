@@ -1,2 +1,3 @@
 MongoDB:
 Remember to update the ulimit for the database
+install watchman for react native
