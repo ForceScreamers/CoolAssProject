@@ -6,7 +6,7 @@ import GroupListHeaders from './GroupListHeaders'
 //  isReady, name, isManager
 
 
-export default function GroupList({ Members }) {
+export default function DisplayGroupList({ GroupList }) {
 
     return (
         <View style={{ flex: 1 }}>
@@ -16,18 +16,18 @@ export default function GroupList({ Members }) {
             </View>
 
             <FlatList
-                data={Members}
+                data={GroupList}
                 keyExtractor={(item, index) => item.id}
                 renderItem={({ item, index }) => (
                     <GroupListMember
                         Index={index}
                         key={item.id}
-                        Name={item.name}
+                        Name={item.username}
                         Change={item.change}
                         Bill={item.bill}
                         Amount={item.amount}
-                        IsReady={item.isReady}
-                        IsManager={item.isManager}
+                        IsReady={item.is_ready}
+                        IsManager={item.is_ranager}
                     />
                 )}
             />

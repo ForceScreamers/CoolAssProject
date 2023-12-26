@@ -1,7 +1,7 @@
 import { View, Text, FlatList, Button, StyleSheet, Pressable, Keyboard, Alert, BackHandler } from 'react-native'
 import React, { useState, useRef, useCallback } from 'react'
 import PaymentInput from './PaymentInput'
-import GroupList from '../components/GroupList'
+import DisplayGroupList from '../components/GroupList'
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { socket } from '../socket';
@@ -10,7 +10,7 @@ import { socket } from '../socket';
 //TODO: Update all users when confirming payment
 //TODO: Change layout for manager and normal user
 
-export default function Payment({ GroupData, IsManager, GroupCode }) {
+export default function Payment({ GroupList, IsManager, GroupCode }) {
     const [isReady, setIsReady] = useState(false);
 
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -70,7 +70,7 @@ export default function Payment({ GroupData, IsManager, GroupCode }) {
 
             <View style={{ flex: 1 }}>
 
-                <GroupList Members={GroupData} />
+                <DisplayGroupList GroupList={GroupList} />
             </View>
 
 

@@ -76,15 +76,16 @@ module.exports = {
             .catch((err) => {
                 console.log(err)
             })
+
     },
     AddUserToGroupByCode: async function (userId, groupCode) {
 
         // Get group id by group code
         let groupId = await db.collection("groups")
-            .find({ code: groupCode }, { _id: 1 })
-        // .catch(err => console.log(err))
+            .find({ code: groupCode })
+            .toArray()
 
-        this.AddUserToGroupById(userId, groupId);
+        this.AddUserToGroupById(userId, groupId[0]._id.toString());
     },
     RemoveUserFromGroup: async function (userId, groupId) {
 
@@ -139,11 +140,24 @@ module.exports = {
         return groupId;
     },
     GetGroupByUser: async function (userId) {
+        // TODO: Make this funciton more readable
+        // Get user ids 
         let group = await db.collection("groups")
             .find({
                 user_ids: { $in: [new ObjectId(userId)] }
             })
-        return group;
+            .toArray()
+
+        // Parse into list of IDs ONLY
+        let parsedGroup = []
+        group[0].user_ids.forEach(userId => {
+            parsedGroup.push(userId)
+        })
+
+        // Get the users by the list of IDs, ommiting the secret stuff (user_id...)
+        let resultGroup = await db.collection("users").find({ _id: { $in: parsedGroup }, }, { username: 1, amount: 1, bill: 1, change: 1, is_ready: 1, is_manager: 1 }).toArray()
+
+        return resultGroup;
     },
     UpdateUsername: async function (userId, newUsername) {
         await db.collection("users")

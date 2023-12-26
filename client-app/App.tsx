@@ -32,6 +32,8 @@ enum Auth {
 
 // TODO: Add page wrapper that shows menu with: profile details, settings, history...
 
+// TODO: Upon connection, check if the user is already in a group
+
 const App = () => {
     const [isConnected, setIsConnected] = useState(socket.connected);
 
@@ -69,18 +71,15 @@ const App = () => {
             StoreUserId(data.userId)
         })
 
-        socket.on('joinedGroup', data => {
-            setGroupList(JSON.parse(data));
+        socket.on('updateGroup', data => {
+
+            setGroupList(data);
             setIsManager(false);
         })
 
         socket.on('createdGroup', data => {
             setGroupCode(data.groupCode);
             setIsManager(true);
-        })
-
-        socket.on('updatedGroup', data => {
-            setGroupList(data)
         })
 
 

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 
 import { socket } from '../socket'
-import GroupList from '../components/GroupList';
+import DisplayGroupList from '../components/GroupList';
 import GoBackButton from '../components/GoBackButton';
 
 export default function HostEvent({ GroupCode }) {

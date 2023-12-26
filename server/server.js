@@ -131,13 +131,16 @@ io.on('connection', (socket) => {
     })
 
     socket.on('requestJoinGroup', async data => {
-        // console.log(await Helper.IsUserInAnyGroup('6569c41c4b44a4eb21963617'))
+        // socket.emit('joinedGroup')
+
+
         if (await Helper.IsUserInAnyGroup(data.userId) === false) {
+            console.log('groupcode', data.groupCode)
             Helper.AddUserToGroupByCode(data.userId, data.groupCode)
 
             let group = await Helper.GetGroupByUser(data.userId);
-            console.log(data.userId)
-            socket.emit('updateGroup', { group: group })
+            console.log(group)
+            socket.emit('updateGroup', group)
 
             socket.emit('joinedGroup')
 

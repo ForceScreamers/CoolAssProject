@@ -19,6 +19,7 @@ export default function JoinEvent() {
 
     useEffect(() => {
         socket.on('joinedGroup', () => {
+            console.log("Joining group")
             navigation.navigate('payment');
         })
         socket.on('groupNotFound', () => {
