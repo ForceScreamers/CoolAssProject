@@ -144,28 +144,35 @@ io.on('connection', (socket) => {
         }
     })
 
-
-
-    socket.on('userReady', data => {
-        let userData = data;
-
-        let user = GetUserBySocketId(socket.id);
-
-        //  Update user data
-        UpdateUserProp(user, 'amount', parseFloat(userData.amount))//TODO:create try parse float that returns 0 if isn't float
-        UpdateUserProp(user, 'bill', parseFloat(userData.bill))
-        UpdateUserProp(user, 'isReady', true);
-
-        let group = GetGroupById(user.groupId);
-
-
-        socket.emit('updatedGroup', group.users)
-
-        if (group.IsReady()) {
-            //TODO:  Calculate all
-            group.CalculateChangeForAll()
-            console.log('group ready!')
+    function ParsePaymentData(data) {
+        //TODO:create try parse float that returns 0 if isn't float
+        let parsedData = {
+            amount: parseFloat(data.amount),
+            bill: parseFloat(data.bill),
+            change: parseFloat(data.change),
         }
+        return parsedData;
+    }
+
+    socket.on('userReady', async data => {
+        let parsedPaymentData = ParsePaymentData(data.payment)
+        parsedPaymentData.is_ready = true;
+
+        Helper.UpdateUserPaymentData(data.userId, parsedPaymentData)
+
+        let group = await Helper.GetGroupByUser(data.userId);
+
+        socket.emit('updateGroup', group)
+
+        let isGroupReady = await Helper.IsGroupReadyByUser(data.userId)
+        if (isGroupReady) {
+
+        }
+        // if (group.IsReady()) {
+        //     //TODO:  Calculate all
+        //     group.CalculateChangeForAll()
+        //     console.log('group ready!')
+        // }
     })
 
     socket.on('userNotReady', () => {

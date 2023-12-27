@@ -1,9 +1,3 @@
-//  מחשב חשבון כולל טיפ דינמיי
-//  
-
-// import { GROUP_ID_NONE } from "./constants";
-
-
 class Group {
     constructor(id) {
         this.users = [];

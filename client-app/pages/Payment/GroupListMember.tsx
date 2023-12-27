@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet, Image } from 'react-native'
 import React, { useEffect } from 'react'
 
-const checkImage = require('../assets/check.png')
-const awaitingImage = require('../assets/awaiting.png')
-const crownImage = require('../assets/crown.png')
+const checkImage = require('../../assets/check.png')
+const awaitingImage = require('../../assets/awaiting.png')
+const crownImage = require('../../assets/crown.png')
 
 
 export default function GroupListMember({ Index, Bill, Amount, Change, IsReady, Name, IsManager }) {

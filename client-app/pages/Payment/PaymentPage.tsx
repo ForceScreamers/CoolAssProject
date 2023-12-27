@@ -88,7 +88,7 @@ export default function Payment({ GroupList, IsManager, GroupCode }) {
                 <Pressable onPress={Expand} >
                     <Text>שלם</Text>
                 </Pressable>
-                <PaymentInput IsManager={IsManager} IsReady={isReady} CollapseSheet={CollapseSheet} />
+                <PaymentInput IsManager={IsManager} CollapseSheet={CollapseSheet} />
             </BottomSheet>
 
         </View>

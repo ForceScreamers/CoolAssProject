@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, Button, Pressable } from 'react-nati
 import { socket } from '../../utils/socket';
 import UserInputAndTitle from '../../components/ui/UserInputAndTitle';
 import TipInputAndDisplay from './TipInputAndDisplay';
+import { GetUserId } from '../../utils/storage';
 
 const ERROR_COLOR = '#FF0000'
 const NORMAL_COLOR = '#70AD47'
@@ -29,7 +30,7 @@ export default function PaymentInput({ IsManager, CollapseSheet }) {
     const [amountFieldColor, setAmountFieldColor] = useState(NORMAL_COLOR)
     const [billFieldColor, setBillFieldColor] = useState(NORMAL_COLOR)
 
-    function ConfirmPayment() {
+    async function ConfirmPayment() {
         //  Validate money input.
         let amountValid = IsNumberValid(amount);
         let billValid = IsNumberValid(bill);
@@ -37,17 +38,22 @@ export default function PaymentInput({ IsManager, CollapseSheet }) {
         setAmountFieldColor(amountValid ? NORMAL_COLOR : ERROR_COLOR);
         setBillFieldColor(billValid ? NORMAL_COLOR : ERROR_COLOR);
 
+        let userId = await GetUserId();
+
         if (amountValid && billValid) {
             CollapseSheet();
 
             socket.emit('userReady', {
-                amount: amount,
-                bill: bill,
-                tip: managerTipValue,
+                userId: userId,
+                payment: {
+                    amount: amount,
+                    bill: bill,
+                    tip: managerTipValue
+                }
             });
         }
         else {
-            socket.emit('userNotReady');
+            socket.emit('userNotReady', userId);
         }
     }
 

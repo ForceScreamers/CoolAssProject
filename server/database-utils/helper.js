@@ -91,14 +91,7 @@ module.exports = {
             })
     },
     RemoveUserFromParentGroup: async function (userId) {
-        let dbParentGroupId = await db.collection("groups")
-            .find({
-                user_ids: { $in: [new ObjectId(userId)] }
-            })
-            .project({ _id: 1 })
-            .toArray()
-
-        let parentGroupId = dbParentGroupId[0]._id;
+        let parentGroupId = await this.GetParentGroupId();
 
         console.log(userId)
         console.log(parentGroupId)
@@ -178,6 +171,48 @@ module.exports = {
     UpdateUsername: async function (userId, newUsername) {
         await db.collection("users")
             .updateOne({ _id: new ObjectId(userId) }, { $set: { username: newUsername } })
+    },
+    UpdateUserPaymentData: async function (userId, paymentData) {
+        await db.collection("users")
+            .updateOne(
+                { _id: new ObjectId(userId) },
+                {
+                    $set: {
+                        amount: paymentData.amount,
+                        bill: paymentData.bill,
+                        change: paymentData.change,
+                        is_ready: paymentData.is_ready
+                    }
+                })
+    },
+    IsGroupReadyByUser: async function (userId) {
+        let group = await this.GetGroupByUser(userId)
+
+        let isReady = true;
+        group.forEach(user => {
+            if (user.is_ready === false) {
+                isReady = false;
+            }
+        })
+
+        return isReady;
+    },
+    GetParentGroupId: async function (userId) {
+        let dbParentGroupId = await db.collection("groups")
+            .find({
+                user_ids: { $in: [new ObjectId(userId)] }
+            })
+            .project({ _id: 1 })
+            .toArray()
+
+        return dbParentGroupId[0]._id;
+    },
+    CalculateGroupPaymentByUserId: async function (userId) {
+        let group = await this.GetGroupByUser(userId);
+
+        // TODO: Calculate change for all users!
+        // TODO:
+
     }
 
 
