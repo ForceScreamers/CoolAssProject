@@ -151,6 +151,7 @@ io.on('connection', (socket) => {
         }
     })
 
+
     socket.on('userReady', data => {
         let userData = data;
 
@@ -190,9 +191,16 @@ io.on('connection', (socket) => {
         UpdateUserProp(user, 'isInAnyGroup', false);
     })
 
-    socket.on('userReconnect', () => {
-        //TODO:  Join the group that the user was in before reconnection, if they were in a group
-        //TODO: connect to database
+    socket.on('userReconnect', async (userId, proceedToPayment) => {
+        console.log(userId)
+        console.log(await Helper.IsUserInAnyGroup(userId))
+        if (await Helper.IsUserInAnyGroup(userId) === true) {
+            let group = await Helper.GetGroupByUser(userId);
+            console.log(group)
+            socket.emit('updateGroup', group)
+            proceedToPayment()
+            console.log('reconnecting user..')
+        }
     })
 
 

@@ -140,24 +140,24 @@ module.exports = {
         return groupId;
     },
     GetGroupByUser: async function (userId) {
-        // TODO: Make this funciton more readable
         // Get user ids 
-        let group = await db.collection("groups")
+        let dbUserIds = await db.collection("groups")
             .find({
                 user_ids: { $in: [new ObjectId(userId)] }
             })
             .toArray()
 
         // Parse into list of IDs ONLY
-        let parsedGroup = []
-        group[0].user_ids.forEach(userId => {
-            parsedGroup.push(userId)
+        let parsedUserIds = []
+        dbUserIds[0].user_ids.forEach(userId => {
+            parsedUserIds.push(userId)
         })
 
+        let projectionFields = { _id: 0 }
         // Get the users by the list of IDs, ommiting the secret stuff (user_id...)
-        let resultGroup = await db.collection("users").find({ _id: { $in: parsedGroup }, }, { username: 1, amount: 1, bill: 1, change: 1, is_ready: 1, is_manager: 1 }).toArray()
+        let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).project(projectionFields).toArray()
 
-        return resultGroup;
+        return users;
     },
     UpdateUsername: async function (userId, newUsername) {
         await db.collection("users")

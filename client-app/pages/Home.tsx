@@ -2,6 +2,9 @@ import { View, Text, Button } from 'react-native'
 import React, { useEffect } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { socket } from '../socket';
+import { GetUserId } from '../storage';
+
 export default function Home({ IsConnected }) {
     const navigation = useNavigation();
 
@@ -11,11 +14,18 @@ export default function Home({ IsConnected }) {
     // }, [])
 
     useEffect(() => {
-        if (IsConnected) {
-            //  Handle reconnect
-            // navigation.navigate('')
-            // socket.emit('userReconnect');
+        async function ReconnectUser() {
+            if (IsConnected) {
+                //  Handle reconnect
+                // navigation.navigate('')
+                // TODO: Prompt reconnect to group?
+                socket.emit('userReconnect', await GetUserId(), () => {
+                    navigation.navigate('payment')
+                });
+            }
         }
+
+        ReconnectUser()
     }, [IsConnected])
 
 

@@ -43,8 +43,13 @@ const App = () => {
 
     const [hasUserId, setHasUserId] = useState(Auth.Loading)
 
+    const [promptReconnect, setPromptReconnect] = useState(false)
 
+    async function ReconnectToGroup() {
+        console.log('reconnecting to group...')
+        // socket.emit('userReconnect', await GetUserId())
 
+    }
 
     useEffect(() => {
         async function onConnect() {
@@ -56,6 +61,7 @@ const App = () => {
             }
             else {
                 setHasUserId(Auth.HasId)
+                ReconnectToGroup()
             }
             setIsConnected(true);
         }
@@ -72,7 +78,7 @@ const App = () => {
         })
 
         socket.on('updateGroup', data => {
-
+            console.log(data)
             setGroupList(data);
             setIsManager(false);
         })
@@ -94,6 +100,8 @@ const App = () => {
     }, [socket])
 
 
+
+
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <>
@@ -105,7 +113,7 @@ const App = () => {
 
                         <Stack.Screen name='payment'>{() =>
                             <Payment
-                                GroupData={groupList}
+                                GroupList={groupList}
                                 IsManager={isManager}
                                 GroupCode={groupCode}
                             />}</Stack.Screen>
