@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TextInput } from 'react-native'
 import React from 'react'
-import UserInputAndTitle from './UserInputAndTitle'
+import UserInputAndTitle from '../../components/ui/UserInputAndTitle'
 
 export default function TipInputAndDisplay({ IsManager, SetTip, TipValue }) {
     return (

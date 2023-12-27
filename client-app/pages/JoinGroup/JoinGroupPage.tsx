@@ -1,10 +1,10 @@
 import { View, Text, TextInput, Button } from 'react-native'
 import React, { useEffect, useState } from 'react'
 
-import { socket } from '../socket'
-import GoBackButton from '../components/GoBackButton';
+import { socket } from '../../utils/socket'
+import GoBackButton from '../../components/ui/GoBackButton';
 import { useNavigation } from '@react-navigation/native';
-import { GetUserId } from '../storage';
+import { GetUserId } from '../../utils/storage';
 
 export default function JoinEvent() {
     const [input, setInput] = useState('');

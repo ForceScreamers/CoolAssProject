@@ -1,9 +1,9 @@
 import { View, Text, Button } from 'react-native'
 import React, { useState } from 'react'
 import { TextInput } from 'react-native-gesture-handler'
-import GoBackButton from '../components/GoBackButton'
-import { socket } from '../socket'
-import { GetUserId } from '../storage'
+import GoBackButton from '../../components/ui/GoBackButton'
+import { socket } from '../../utils/socket'
+import { GetUserId } from '../../utils/storage'
 import { useNavigation } from '@react-navigation/native'
 
 export default function EditUsername({ Auth, HasUserId, SetHasUserId }) {

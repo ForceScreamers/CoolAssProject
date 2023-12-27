@@ -1,3 +1,18 @@
 MongoDB:
 Remember to update the ulimit for the database
-install watchman for react native
+
+General todos:
+Where to run server & database
+
+
+
+React Client:
+Encrypt client stored userId as token.
+
+Add page wrapper that shows menu with: profile details, settings, history...
+
+Finish the calculator and payment page
+
+
+
+Server:

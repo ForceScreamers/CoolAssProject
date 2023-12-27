@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, TextInput, Button, Pressable } from 'react-native';
-import { socket } from '../socket';
-import UserInputAndTitle from '../components/UserInputAndTitle';
-import TipInputAndDisplay from '../components/TipInputAndDisplay';
+import { socket } from '../../utils/socket';
+import UserInputAndTitle from '../../components/ui/UserInputAndTitle';
+import TipInputAndDisplay from './TipInputAndDisplay';
 
 const ERROR_COLOR = '#FF0000'
 const NORMAL_COLOR = '#70AD47'
