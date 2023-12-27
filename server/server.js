@@ -32,9 +32,6 @@ app.get('/users', (req, res) => {
 
 const NO_USER_FOUND = 0;
 
-//? TODO: Remember groups on server restart
-//TODO: Implement user id system
-// TODO: Create signup page with username!
 
 function GetUserBySocketId(socketId) {
     for (let i = 0; i < connectedUsers.length; i++) {
@@ -161,7 +158,7 @@ io.on('connection', (socket) => {
 
         let group = GetGroupById(user.groupId);
 
-        // TODO: Change all 'updatedGroup' to get the group data from the database
+
         socket.emit('updatedGroup', group.users)
 
         if (group.IsReady()) {

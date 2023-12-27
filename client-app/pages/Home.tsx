@@ -10,12 +10,7 @@ export default function Home({ IsConnected }) {
     const navigation = useNavigation();
 
 
-    // useEffect(() => {
-    //     navigation.navigate('editDisplayName')
-    // }, [])
-
     useEffect(() => {
-        // TODO: Prompt only if the user is in a group!
         async function ReconnectUser() {
             socket.emit('userReconnect', await GetUserId(), () => {
                 navigation.navigate('payment')
@@ -30,7 +25,6 @@ export default function Home({ IsConnected }) {
         async function CheckReconnection() {
             socket.emit('isInAnyGroup', await GetUserId(), () => {
                 ShowReconnectAlert(ReconnectUser, LeaveGroup)
-
             })
         }
 

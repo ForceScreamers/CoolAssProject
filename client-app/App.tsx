@@ -28,11 +28,6 @@ enum Auth {
 }
 
 
-// TODO: Encrypt client stored userId as token.
-
-// TODO: Add page wrapper that shows menu with: profile details, settings, history...
-
-// TODO: Upon connection, check if the user is already in a group
 
 const App = () => {
     const [isConnected, setIsConnected] = useState(socket.connected);
@@ -42,8 +37,6 @@ const App = () => {
     const [isManager, setIsManager] = useState(false);//* There is also a manager prop in the user on server for redundency
 
     const [hasUserId, setHasUserId] = useState(Auth.Loading)
-
-    const [promptReconnect, setPromptReconnect] = useState(false)
 
     async function ReconnectToGroup() {
         console.log('reconnecting to group...')
@@ -78,7 +71,6 @@ const App = () => {
         })
 
         socket.on('updateGroup', data => {
-            console.log(data)
             setGroupList(data);
             setIsManager(false);
         })

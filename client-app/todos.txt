@@ -1,4 +1,16 @@
-שרת NODE שמתחבר לPOSTGRES 
-מקום להריץ את השרת בתור API
-עיצוב מסכים
-תרשים למסד נתונים
+General todos:
+Where to run server & database
+
+
+
+
+React Client:
+Encrypt client stored userId as token.
+
+Add page wrapper that shows menu with: profile details, settings, history...
+
+Finish the calculator and payment page
+
+
+
+Server:

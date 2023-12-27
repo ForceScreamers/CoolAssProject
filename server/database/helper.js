@@ -10,14 +10,7 @@ connectToDb((err) => {
     }
 })
 
-// TODO: Db queries:
-// Create user
-// Get group
 
-
-// Update group?
-// Create group
-// Add to group
 
 // TODO: Create an error handler for queries instead of catch(()=>{})
 
@@ -167,7 +160,9 @@ module.exports = {
                 user_ids: { $in: [new ObjectId(userId)] }
             })
             .toArray()
+
         console.log(userId)
+
         // Parse into list of IDs ONLY
         let parsedUserIds = []
         dbUserIds[0].user_ids.forEach(userId => {
