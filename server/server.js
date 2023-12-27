@@ -1,10 +1,10 @@
-const { Group, User } = require('./s_calculator')
+const { Group, User } = require('./server-data/s_calculator')
 
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
-const Helper = require('./database/helper');
+const Helper = require('./database-utils/helper');
 
 
 const app = express();

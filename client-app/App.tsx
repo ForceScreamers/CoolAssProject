@@ -5,16 +5,16 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
 //  Screens
-import HostEvent from './pages/HostEvent';
-import JoinEvent from './pages/JoinEvent';
+import HostEvent from './pages/CreateGroup/CreateGroupPage';
+import JoinEvent from './pages/JoinGroup/JoinGroupPage';
 
-import { socket } from './socket'
-import Home from './pages/Home';
-import Payment from './pages/Payment';
+import { socket } from './utils/socket'
+import Home from './pages/Home/HomePage';
+import Payment from './pages/Payment/PaymentPage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import EditUsername from './pages/EditDisplayName';
+import EditUsername from './pages/Settings/EditUsernamePage';
 
-import { GetUserId, StoreUserId } from './storage';
+import { GetUserId, StoreUserId } from './utils/storage';
 const Stack = createNativeStackNavigator();
 
 const linking = {
