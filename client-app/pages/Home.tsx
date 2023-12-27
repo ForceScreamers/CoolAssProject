@@ -1,9 +1,10 @@
-import { View, Text, Button } from 'react-native'
+import { View, Text, Button, Alert } from 'react-native'
 import React, { useEffect } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { socket } from '../socket';
 import { GetUserId } from '../storage';
+import ShowReconnectAlert from '../components/ShowReconnectAlert.tsx';
 
 export default function Home({ IsConnected }) {
     const navigation = useNavigation();
@@ -14,18 +15,26 @@ export default function Home({ IsConnected }) {
     // }, [])
 
     useEffect(() => {
+        // TODO: Prompt only if the user is in a group!
         async function ReconnectUser() {
-            if (IsConnected) {
-                //  Handle reconnect
-                // navigation.navigate('')
-                // TODO: Prompt reconnect to group?
-                socket.emit('userReconnect', await GetUserId(), () => {
-                    navigation.navigate('payment')
-                });
-            }
+            socket.emit('userReconnect', await GetUserId(), () => {
+                navigation.navigate('payment')
+            });
         }
 
-        ReconnectUser()
+        async function LeaveGroup() {
+            socket.emit('leaveGroup', await GetUserId())
+            console.log("leaving group...")
+        }
+
+        async function CheckReconnection() {
+            socket.emit('isInAnyGroup', await GetUserId(), () => {
+                ShowReconnectAlert(ReconnectUser, LeaveGroup)
+
+            })
+        }
+
+        CheckReconnection()
     }, [IsConnected])
 
 

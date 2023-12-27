@@ -131,15 +131,11 @@ io.on('connection', (socket) => {
     })
 
     socket.on('requestJoinGroup', async data => {
-        // socket.emit('joinedGroup')
-
-
         if (await Helper.IsUserInAnyGroup(data.userId) === false) {
-            console.log('groupcode', data.groupCode)
-            Helper.AddUserToGroupByCode(data.userId, data.groupCode)
+            await Helper.AddUserToGroupByCode(data.userId, data.groupCode)
 
             let group = await Helper.GetGroupByUser(data.userId);
-            console.log(group)
+
             socket.emit('updateGroup', group)
 
             socket.emit('joinedGroup')
@@ -150,6 +146,7 @@ io.on('connection', (socket) => {
             socket.emit('groupNotFound');
         }
     })
+
 
 
     socket.on('userReady', data => {
@@ -184,22 +181,27 @@ io.on('connection', (socket) => {
         socket.emit('updatedGroup', group.users)
     })
 
-    socket.on('leaveGroup', data => {
-        console.log('leaving group')
-        let user = GetUserBySocketId(socket.id);
+    socket.on('isInAnyGroup', async (userId, proceedToReconnection) => {
+        isInAnyGroup = await Helper.IsUserInAnyGroup(userId)
 
-        UpdateUserProp(user, 'isInAnyGroup', false);
+        if (isInAnyGroup) {
+            proceedToReconnection()
+        }
+    })
+
+    socket.on('leaveGroup', userId => {
+        console.log('leaving group')
+        Helper.RemoveUserFromParentGroup(userId)
     })
 
     socket.on('userReconnect', async (userId, proceedToPayment) => {
-        console.log(userId)
-        console.log(await Helper.IsUserInAnyGroup(userId))
         if (await Helper.IsUserInAnyGroup(userId) === true) {
+
             let group = await Helper.GetGroupByUser(userId);
-            console.log(group)
+
+
             socket.emit('updateGroup', group)
             proceedToPayment()
-            console.log('reconnecting user..')
         }
     })
 

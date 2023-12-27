@@ -87,11 +87,32 @@ module.exports = {
 
         this.AddUserToGroupById(userId, groupId[0]._id.toString());
     },
-    RemoveUserFromGroup: async function (userId, groupId) {
+    RemoveUserFromGivenGroup: async function (userId, groupId) {
 
         await db.collection("groups")
             .updateOne(
                 { _id: new ObjectId(groupId) },
+                { $pull: { user_ids: new ObjectId(userId) } })
+            .catch((err) => {
+                console.log(err)
+            })
+    },
+    RemoveUserFromParentGroup: async function (userId) {
+        let dbParentGroupId = await db.collection("groups")
+            .find({
+                user_ids: { $in: [new ObjectId(userId)] }
+            })
+            .project({ _id: 1 })
+            .toArray()
+
+        let parentGroupId = dbParentGroupId[0]._id;
+
+        console.log(userId)
+        console.log(parentGroupId)
+
+        await db.collection("groups")
+            .updateOne(
+                { _id: new ObjectId(parentGroupId) },
                 { $pull: { user_ids: new ObjectId(userId) } })
             .catch((err) => {
                 console.log(err)
@@ -146,7 +167,7 @@ module.exports = {
                 user_ids: { $in: [new ObjectId(userId)] }
             })
             .toArray()
-
+        console.log(userId)
         // Parse into list of IDs ONLY
         let parsedUserIds = []
         dbUserIds[0].user_ids.forEach(userId => {
