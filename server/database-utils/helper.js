@@ -148,6 +148,7 @@ module.exports = {
     },
     GetGroupByUser: async function (userId) {
         // Get user ids 
+        // TODO: Add get group tip to display
         let dbUserIds = await db.collection("groups")
             .find({
                 user_ids: { $in: [new ObjectId(userId)] }
@@ -185,6 +186,16 @@ module.exports = {
                     }
                 })
     },
+    UpdateUserChange: async function (userId, change) {
+        await db.collection("users")
+            .updateOne(
+                { _id: new ObjectId(userId) },
+                {
+                    $set: {
+                        change: change,
+                    }
+                })
+    },
     IsGroupReadyByUser: async function (userId) {
         let group = await this.GetGroupByUser(userId)
 
@@ -205,16 +216,53 @@ module.exports = {
             .project({ _id: 1 })
             .toArray()
 
-        return dbParentGroupId[0]._id;
+        return dbParentGroupId[0]._id.toString();
+    },
+    GetGroupTip: async function (groupId) {
+        let groupTip = await db.collection("groups")
+            .find({ _id: new ObjectId(groupId) })
+            .project({ tip_percent: 1 })
+            .toArray()
+
+        return groupTip[0].tip_percent;
+    },
+    GetGroupUserCount: async function (groupId) {
+        // Counting the number of users in a group
+        let dbResult = await db.collection("groups")
+            .aggregate([
+                {
+                    $match: { _id: new ObjectId(groupId) }
+                },
+                {
+                    $project: {
+                        userCount: { $cond: { if: { $isArray: "$user_ids" }, then: { $size: "$user_ids" }, else: "NA" } }
+                    }
+                }
+
+            ])
+            .toArray()
+
+        return dbResult[0].userCount;
     },
     CalculateGroupPaymentByUserId: async function (userId) {
-        let group = await this.GetGroupByUser(userId);
+        // Get users
+        let usersInGroup = await this.GetGroupByUser(userId);
 
-        // TODO: Calculate change for all users!
-        // TODO:
+        // Get group data 
+        let parentGroupId = await this.GetParentGroupId(userId);
+        let userCount = await this.GetGroupUserCount(parentGroupId);
+        let groupTip = await this.GetGroupTip(parentGroupId);
 
+
+
+        // Update change for all users
+        usersInGroup.forEach(async user => {
+            let change = 0;
+
+            change = user.amount - (groupTip / userCount + user.bill);// Deduct the individual tip from the payment
+            change = +change.toFixed(2);//  Round to two decimal places
+
+            await this.UpdateUserChange(user._id, change)
+        })
     }
-
-
 }
-

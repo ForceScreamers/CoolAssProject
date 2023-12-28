@@ -166,7 +166,7 @@ io.on('connection', (socket) => {
 
         let isGroupReady = await Helper.IsGroupReadyByUser(data.userId)
         if (isGroupReady) {
-
+            console.log(await Helper.CalculateGroupPaymentByUserId(data.userId));
         }
         // if (group.IsReady()) {
         //     //TODO:  Calculate all
