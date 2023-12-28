@@ -16,3 +16,4 @@ Finish the calculator and payment page
 
 
 Server:
+Look into parameter arguments for mongodb nodejs

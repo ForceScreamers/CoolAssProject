@@ -264,5 +264,10 @@ module.exports = {
 
             await this.UpdateUserChange(user._id, change)
         })
+    },
+    UpdateUserReady: async function (isReady, userId) {
+        await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { is_ready: isReady } })
+
+        return await this.GetGroupByUser(userId)
     }
 }

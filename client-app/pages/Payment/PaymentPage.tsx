@@ -1,5 +1,5 @@
 import { View, Text, FlatList, Button, StyleSheet, Pressable, Keyboard, Alert, BackHandler } from 'react-native'
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import PaymentInput from './PaymentInput'
 import DisplayGroupList from './GroupList'
 import BottomSheet from '@gorhom/bottom-sheet';
@@ -10,7 +10,7 @@ import { socket } from '../../utils/socket';
 //TODO: Change layout for manager and normal user
 
 export default function Payment({ GroupList, IsManager, GroupCode }) {
-    const [isReady, setIsReady] = useState(false);
+    const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(true);
 
     const bottomSheetRef = useRef<BottomSheet>(null);
     const navigation = useNavigation();
@@ -45,12 +45,18 @@ export default function Payment({ GroupList, IsManager, GroupCode }) {
         console.log('handleSheetChanges', index);
         if (index === 0) {
             Keyboard.dismiss();
-            setIsReady(true);
+            setIsBottomSheetOpen(false);
         }
         else if (index == 1) {
-            setIsReady(false)
+            setIsBottomSheetOpen(true)
         }
     }, []);
+
+    useEffect(() => {
+        console.log('open?', isBottomSheetOpen);
+
+    }, [isBottomSheetOpen])
+
 
 
     function Expand() {
@@ -87,7 +93,11 @@ export default function Payment({ GroupList, IsManager, GroupCode }) {
                 <Pressable onPress={Expand} >
                     <Text>שלם</Text>
                 </Pressable>
-                <PaymentInput IsManager={IsManager} CollapseSheet={CollapseSheet} />
+                <PaymentInput
+                    IsManager={IsManager}
+                    CollapseSheet={CollapseSheet}
+                    IsBottomSheetOpen={isBottomSheetOpen}
+                />
             </BottomSheet>
 
         </View>

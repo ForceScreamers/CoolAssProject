@@ -1,5 +1,3 @@
-const { Group, User } = require('./server-data/s_calculator')
-
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
@@ -117,11 +115,11 @@ io.on('connection', (socket) => {
         // TODO: finish
     })
 
-    socket.on('userNotReady', () => {
-        // TODO: finish
+    socket.on('userNotReady', async (userId) => {
+        let group = await Helper.UpdateUserReady(false, userId)
         console.log("Not ready")
 
-        // socket.emit('updatedGroup', )
+        socket.emit('updateGroup', group)
     })
 
     socket.on('isInAnyGroup', async (userId, proceedToReconnection) => {

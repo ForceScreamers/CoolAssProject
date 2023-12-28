@@ -21,7 +21,7 @@ function IsNumberValid(input) {
     return false;
 }
 
-export default function PaymentInput({ IsManager, CollapseSheet }) {
+export default function PaymentInput({ IsManager, CollapseSheet, IsBottomSheetOpen }) {
     const [amount, setAmount] = useState(-1);
     const [bill, setBill] = useState('');
 
@@ -42,6 +42,9 @@ export default function PaymentInput({ IsManager, CollapseSheet }) {
 
         if (amountValid && billValid) {
             CollapseSheet();
+        }
+
+        if (amountValid && billValid) {
 
             socket.emit('userReady', {
                 userId: userId,
@@ -56,6 +59,13 @@ export default function PaymentInput({ IsManager, CollapseSheet }) {
             socket.emit('userNotReady', userId);
         }
     }
+
+    useEffect(() => {
+        if (IsBottomSheetOpen === false) {
+            ConfirmPayment()
+        }
+    }, [IsBottomSheetOpen])
+
 
     return (
 
