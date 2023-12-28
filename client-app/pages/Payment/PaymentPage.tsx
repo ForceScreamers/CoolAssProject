@@ -7,7 +7,6 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { socket } from '../../utils/socket';
 
 //TODO: Update total bill + tip while typing
-//TODO: Update all users when confirming payment
 //TODO: Change layout for manager and normal user
 
 export default function Payment({ GroupList, IsManager, GroupCode }) {
