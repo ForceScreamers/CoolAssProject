@@ -24,70 +24,17 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/users', (req, res) => {
-    // Helper.GetUsers().then(data => console.log(data))
-    Helper.CreateGroupForUser("6569c41c4b44a4eb21963617").then(data => console.log(data))
-})
+// app.get('/users', (req, res) => {
+// Helper.GetUsers().then(data => console.log(data))
+// Helper.CreateGroupForUser("6569c41c4b44a4eb21963617").then(data => console.log(data))
+// })
 
-
-const NO_USER_FOUND = 0;
-
-
-function GetUserBySocketId(socketId) {
-    for (let i = 0; i < connectedUsers.length; i++) {
-        if (connectedUsers[i].id === socketId) {
-            return connectedUsers[i];
-        }
-    }
-    return NO_USER_FOUND;
-}
-
-let connectedUsers = []
-
-function UpdateUserProp(user, prop, value) {
-    /**
-     * Used to update a property of an existing user.
-     * Because parameters are passed by value, we need to find the original object within the list of users and update it's propery directly.
-     */
-    let connectedUserIndex = connectedUsers.map(connectedUser => connectedUser.id).indexOf(user.id)
-
-    if (connectedUserIndex !== -1) {
-        connectedUsers[connectedUserIndex][prop] = value;
-    }
-}
-
-function GetGroupById(id) {
-    let foundGroup = groups.filter(group => {
-        return group.id === id;
-    })
-
-    return foundGroup[0];
-}
-
-function CreateGroupFor(user) {
-    UpdateUserProp(user, 'isInAnyGroup', true);
-    UpdateUserProp(user, 'isManager', true);
-
-    let groupId = GenerateGroupId();
-    groups.push(new Group(groupId));
-
-    GetGroupById(groupId).AddUser(user);
-
-    return groupId;
-}
-
-function GenerateGroupId() {
-    return groups.length;// The group id is dictated by it's index in the groups array
-}
 
 
 io.on('connection', (socket) => {
 
     // Send the client it's user id
     console.log("user connected")
-    // socket.emit('userInitialize', {userId: })
-    // Init new user
-    // let { userExists, userId } = await Helper.AddUser('default_username :3');
 
     // Try to get user id
     // If there is no user id, create new user and ask for username
@@ -114,8 +61,6 @@ io.on('connection', (socket) => {
 
     socket.on('canCreateGroup', (data) => {
         console.log('creating group')
-        // let user = GetUserBySocketId(socket.id);
-
 
         let groupId = Helper.CreateGroupForUser(data.userId)
 
@@ -168,21 +113,15 @@ io.on('connection', (socket) => {
         if (isGroupReady) {
             console.log(await Helper.CalculateGroupPaymentByUserId(data.userId));
         }
-        // if (group.IsReady()) {
-        //     //TODO:  Calculate all
-        //     group.CalculateChangeForAll()
-        //     console.log('group ready!')
-        // }
+
+        // TODO: finish
     })
 
     socket.on('userNotReady', () => {
-        let user = GetUserBySocketId(socket.id);
-        console.log("Not ")
+        // TODO: finish
+        console.log("Not ready")
 
-        UpdateUserProp(user, 'isReady', false);
-
-        let group = GetGroupById(user.groupId);
-        socket.emit('updatedGroup', group.users)
+        // socket.emit('updatedGroup', )
     })
 
     socket.on('isInAnyGroup', async (userId, proceedToReconnection) => {
@@ -211,19 +150,13 @@ io.on('connection', (socket) => {
 
 
     socket.once('disconnect', (reason) => {
+        // TODO: finish
         console.log(reason)
-        RemoveConnectedUserById(socket.id)
-        console.log('a user disconnected', connectedUsers.length);
+        // RemoveConnectedUserById(socket.id)
     })
 });
 
-function RemoveConnectedUserById(id) {
-    for (let i = 0; i < connectedUsers.length; i++) {
-        if (connectedUsers[i].id == id) {
-            connectedUsers.splice(i, 1);
-        }
-    }
-}
+
 
 
 
