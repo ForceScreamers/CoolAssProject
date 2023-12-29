@@ -37,6 +37,30 @@ module.exports = {
             .catch(err => console.log(err))
         return userCount == 0
     },
+    GetUserPaymentData: async function (userId) {
+        let user = await db.collection("users")
+            .findOne({ _id: new ObjectId(userId) })
+            .project({ _id: 1, amount: 1, bill: 1, change: 1 })
+    },
+    // GetGroupPaymentData: async function (groupId) {
+    //     let dbUserIds = await db.collection("groups")
+    //         .find({
+    //             _id: new ObjectId(groupId)
+    //         })
+    //         .toArray()
+
+    //     // Parse into list of IDs ONLY
+    //     let parsedUserIds = []
+    //     dbUserIds[0].user_ids.forEach(userId => {
+    //         parsedUserIds.push(userId)
+    //     })
+
+    //     let projectionFields = { _id: 1, amount: 1, bill: 1, change: 1 }
+
+    //     let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).project(projectionFields).toArray()
+
+    //     return users;
+    // },
     AddNewUser: async function (username) {
         //  Add user
         let userId;

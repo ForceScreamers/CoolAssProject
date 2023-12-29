@@ -15,6 +15,16 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import EditUsername from './pages/Settings/EditUsernamePage';
 
 import { GetUserId, StoreUserId } from './utils/storage';
+
+import NoChange from './pages/PaymentPages/NoChange';
+import MissingAmount from './pages/PaymentPages/MissingAmount';
+import YouOweSomeone from './pages/PaymentPages/YouOweSomeone'
+import LeftoverChange from './pages/PaymentPages/LeftoverChange'
+import LeftoverChangePayForSomeone from './pages/PaymentPages/LeftoverChangePayForSomeone'
+import SomeoneOwesYou from './pages/PaymentPages/SomeoneOwesYou'
+
+
+
 const Stack = createNativeStackNavigator();
 
 const linking = {
@@ -112,6 +122,14 @@ const App = () => {
                         <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
                         <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
                         <Stack.Screen name='editDisplayName'>{() => <EditUsername Auth={Auth} HasUserId={hasUserId} SetHasUserId={setHasUserId} />}</Stack.Screen>
+
+                        {/* Payment process screens */}
+                        <Stack.Screen name='noChange'>{() => <NoChange />}</Stack.Screen>
+                        <Stack.Screen name='missingAmount'>{() => <MissingAmount />}</Stack.Screen>
+                        <Stack.Screen name='youOweSomeone'>{() => <YouOweSomeone />}</Stack.Screen>
+                        <Stack.Screen name='leftoverChange'>{() => <LeftoverChange />}</Stack.Screen>
+                        <Stack.Screen name='leftoverChangePayForSomeone'>{() => <LeftoverChangePayForSomeone></LeftoverChangePayForSomeone>}</Stack.Screen>
+                        <Stack.Screen name='someoneOwesYou'>{() => <SomeoneOwesYou></SomeoneOwesYou>}</Stack.Screen>
 
                     </Stack.Navigator>
                 </NavigationContainer>)}

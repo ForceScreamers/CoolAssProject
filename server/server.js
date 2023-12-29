@@ -110,9 +110,38 @@ io.on('connection', (socket) => {
         let isGroupReady = await Helper.IsGroupReadyByUser(data.userId)
         if (isGroupReady) {
             console.log(await Helper.CalculateGroupPaymentByUserId(data.userId));
-        }
 
-        // TODO: finish
+
+            let userData = await Helper.GetUserPaymentData(data.userId)
+
+            let noNegativeChange = true;
+            // TODO: in each case, send appropriate emit
+            if (userData.change < 0) {
+                // Owes money
+                let amountMissing = 1;//TODO: add missing amount
+                socket.emit('paymentMissingAmount', amountMissing)
+            } else if (userData.change > 0) {
+                // Has change to spare
+
+
+                if (noNegativeChange) {
+                    // no one has negative change
+                    let leftoverChange = 1//TODO: Add leftover change
+                    socket.emit('leftoverChange', leftoverChange)
+                } else {
+                    // you can pay for someone
+                    // TODO: add who can you pay for
+                    socket.emit('paymentLeftoverChangePayForSomeone', data)
+                }
+
+
+            } else if (userData.change === 0) {
+                // No change
+                socket.emit('paymentNoChange')
+            }
+
+            // ... 
+        }
     })
 
     socket.on('userNotReady', async (userId) => {

@@ -20,6 +20,24 @@ export default function Payment({ GroupList, IsManager, GroupCode }) {
         navigation.navigate('home');
     }
 
+    useEffect(() => {
+        socket.on('paymentNoChange', () => {
+            navigation.navigate('noChange')
+        })
+        socket.on('paymentMissingAmount', (data) => {
+            console.log(data)//TODO: display missing amount
+            navigation.navigate('missingAmount')
+        })
+        socket.on('leftoverChange', (data) => {
+            console.log(data)//TODO: show leftover change
+            navigation.navigate('leftoverChange')
+        })
+        socket.on('paymentLeftoverChangePayForSomeone', (data) => {
+            console.log(data)//TODO: Show who can you pay for and a button to pay for them
+            navigation.navigate('leftoverChangePayForSomeone')
+        })
+    }, [socket])
+
     useFocusEffect(() => {
         const backAction = () => {
             Alert.alert('רגע!', 'האם אתה רוצה להתנתק מהקבוצה?', [
