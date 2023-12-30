@@ -9,7 +9,7 @@ import { socket } from '../../utils/socket';
 //TODO: Update total bill + tip while typing
 //TODO: Change layout for manager and normal user
 
-export default function Payment({ GroupList, IsManager, GroupCode }) {
+export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmount }) {
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(true);
 
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -24,8 +24,9 @@ export default function Payment({ GroupList, IsManager, GroupCode }) {
         socket.on('paymentNoChange', () => {
             navigation.navigate('noChange')
         })
-        socket.on('paymentMissingAmount', (data) => {
-            console.log(data)//TODO: display missing amount
+        socket.on('paymentMissingAmount', (missingAmount) => {
+            //TODO: display missing amount
+            SetMissingAmount(missingAmount)
             navigation.navigate('missingAmount')
         })
         socket.on('leftoverChange', (data) => {

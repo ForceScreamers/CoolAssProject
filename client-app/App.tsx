@@ -48,6 +48,8 @@ const App = () => {
 
     const [hasUserId, setHasUserId] = useState(Auth.Loading)
 
+    const [missingAmount, setMissingAmount] = useState(0);
+
     async function ReconnectToGroup() {
         console.log('reconnecting to group...')
         // socket.emit('userReconnect', await GetUserId())
@@ -118,6 +120,7 @@ const App = () => {
                                 GroupList={groupList}
                                 IsManager={isManager}
                                 GroupCode={groupCode}
+                                SetMissingAmount={setMissingAmount}
                             />}</Stack.Screen>
                         <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
                         <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
@@ -125,7 +128,7 @@ const App = () => {
 
                         {/* Payment process screens */}
                         <Stack.Screen name='noChange'>{() => <NoChange />}</Stack.Screen>
-                        <Stack.Screen name='missingAmount'>{() => <MissingAmount />}</Stack.Screen>
+                        <Stack.Screen name='missingAmount'>{() => <MissingAmount MissingAmount={missingAmount} />}</Stack.Screen>
                         <Stack.Screen name='youOweSomeone'>{() => <YouOweSomeone />}</Stack.Screen>
                         <Stack.Screen name='leftoverChange'>{() => <LeftoverChange />}</Stack.Screen>
                         <Stack.Screen name='leftoverChangePayForSomeone'>{() => <LeftoverChangePayForSomeone></LeftoverChangePayForSomeone>}</Stack.Screen>

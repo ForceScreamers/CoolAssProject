@@ -3,7 +3,7 @@ import React, { useEffect } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { socket } from '../../utils/socket';
 
-export default function MissingAmount() {
+export default function MissingAmount({ MissingAmount }) {
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -16,7 +16,7 @@ export default function MissingAmount() {
 
     return (
         <View>
-            <Text>חסר לך כסף, חכה שישלימו לך...</Text>
+            <Text>חסר לך כסף, חכה שישלימו לך... {MissingAmount}</Text>
 
         </View>
     )

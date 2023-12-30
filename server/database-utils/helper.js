@@ -25,9 +25,6 @@ module.exports = {
             })
         return users;
     },
-    RegisterUser: async function (username) {
-
-    },
     UserIsExists: async function (userId) {
         // Check if exists
         let userCount = await db.collection("users")
@@ -38,9 +35,12 @@ module.exports = {
         return userCount == 0
     },
     GetUserPaymentData: async function (userId) {
-        let user = await db.collection("users")
-            .findOne({ _id: new ObjectId(userId) })
+        let userData = await db.collection("users")
+            .find({ _id: new ObjectId(userId) })
             .project({ _id: 1, amount: 1, bill: 1, change: 1 })
+            .toArray()
+
+        return userData[0];
     },
     // GetGroupPaymentData: async function (groupId) {
     //     let dbUserIds = await db.collection("groups")
@@ -187,9 +187,8 @@ module.exports = {
             parsedUserIds.push(userId)
         })
 
-        let projectionFields = { _id: 0 }
         // Get the users by the list of IDs, ommiting the secret stuff (user_id...)
-        let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).project(projectionFields).toArray()
+        let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).toArray()
 
         return users;
     },
@@ -197,7 +196,8 @@ module.exports = {
         await db.collection("users")
             .updateOne({ _id: new ObjectId(userId) }, { $set: { username: newUsername } })
     },
-    UpdateUserPaymentData: async function (userId, paymentData) {
+    UpdateUserPaymentDetails: async function (userId, paymentData) {
+
         await db.collection("users")
             .updateOne(
                 { _id: new ObjectId(userId) },
@@ -205,10 +205,18 @@ module.exports = {
                     $set: {
                         amount: paymentData.amount,
                         bill: paymentData.bill,
-                        change: paymentData.change,
-                        is_ready: paymentData.is_ready
+                        change: paymentData.change,//TODO check if nessesary
                     }
                 })
+    },
+    UpdateUserIsReady: async function (userId, isReady) {
+        console.log("🚀 ~ file: helper.js:214 ~ userId:", userId)
+
+        await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { is_ready: isReady } })
+
+        // TODO: Remove id field from result
+
+        return await this.GetGroupByUser(userId)
     },
     UpdateUserChange: async function (userId, change) {
         await db.collection("users")
@@ -268,7 +276,7 @@ module.exports = {
 
         return dbResult[0].userCount;
     },
-    CalculateGroupPaymentByUserId: async function (userId) {
+    UpdateChangeForParentGroup: async function (userId) {
         // Get users
         let usersInGroup = await this.GetGroupByUser(userId);
 
@@ -278,20 +286,18 @@ module.exports = {
         let groupTip = await this.GetGroupTip(parentGroupId);
 
 
-
         // Update change for all users
         usersInGroup.forEach(async user => {
             let change = 0;
 
+            // !
             change = user.amount - (groupTip / userCount + user.bill);// Deduct the individual tip from the payment
             change = +change.toFixed(2);//  Round to two decimal places
 
-            await this.UpdateUserChange(user._id, change)
+
+
+            await this.UpdateUserChange(user._id.toString(), change)
         })
     },
-    UpdateUserReady: async function (isReady, userId) {
-        await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { is_ready: isReady } })
 
-        return await this.GetGroupByUser(userId)
-    }
 }

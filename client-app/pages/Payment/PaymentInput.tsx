@@ -56,13 +56,18 @@ export default function PaymentInput({ IsManager, CollapseSheet, IsBottomSheetOp
             });
         }
         else {
+            console.log("not ready!")
             socket.emit('userNotReady', userId);
         }
     }
 
     useEffect(() => {
+        async function EmitNotReady() { socket.emit('userNotReady', await GetUserId()); }
+
         if (IsBottomSheetOpen === false) {
             ConfirmPayment()
+        } else {
+            EmitNotReady()
         }
     }, [IsBottomSheetOpen])
 

@@ -87,7 +87,7 @@ io.on('connection', (socket) => {
         }
     })
 
-    function ParsePaymentData(data) {
+    function ParsePaymentDetails(data) {
         //TODO:create try parse float that returns 0 if isn't float
         let parsedData = {
             amount: parseFloat(data.amount),
@@ -97,57 +97,69 @@ io.on('connection', (socket) => {
         return parsedData;
     }
 
+
+
+    function CalculateAndEmitMissingAmount(userPaymentData) {
+        let amountMissing = userPaymentData.change * -1;
+        socket.emit('paymentMissingAmount', amountMissing)
+    }
+
+    function CalculateAndEmitDebts(userPaymentData) {
+        let noOneOwesMoney = true;
+        if (noOneOwesMoney) {
+            // no one has negative change
+
+            socket.emit('leftoverChange', userPaymentData.change)
+        } else {
+            // Somone owes money
+            // you can pay for someone
+            // TODO: add who can you pay for
+
+            //Get all users with negative change
+            // return those who's abs change is smaller than yours
+            // if there are users left that cant be covered, emit appropriate message
+            socket.emit('paymentLeftoverChangePayForSomeone', data)
+        }
+    }
+
+    function EmitStateByChange(userPaymentData) {
+        // Send to user its state according to their change status
+        let change = userPaymentData.change;
+
+        if (change < 0) {
+            // Owes money
+            CalculateAndEmitMissingAmount(userPaymentData)
+
+        } else if (change > 0) {
+            // Has change to spare
+            CalculateAndEmitDebts(userPaymentData);
+
+        } else if (change === 0) {
+            // No change
+            socket.emit('paymentNoChange')
+        }
+    }
+
     socket.on('userReady', async data => {
-        let parsedPaymentData = ParsePaymentData(data.payment)
-        parsedPaymentData.is_ready = true;
+        console.log(data)
+        Helper.UpdateUserIsReady(data.userId, true)
 
-        Helper.UpdateUserPaymentData(data.userId, parsedPaymentData)
+        // Parse and update the amount and bill in db
+        Helper.UpdateUserPaymentDetails(data.userId, ParsePaymentDetails(data.payment))
 
-        let group = await Helper.GetGroupByUser(data.userId);
+        await Helper.UpdateChangeForParentGroup(data.userId);
 
-        socket.emit('updateGroup', group)
+        socket.emit('updateGroup', await Helper.GetGroupByUser(data.userId))
 
-        let isGroupReady = await Helper.IsGroupReadyByUser(data.userId)
-        if (isGroupReady) {
-            console.log(await Helper.CalculateGroupPaymentByUserId(data.userId));
-
-
-            let userData = await Helper.GetUserPaymentData(data.userId)
-
-            let noNegativeChange = true;
-            // TODO: in each case, send appropriate emit
-            if (userData.change < 0) {
-                // Owes money
-                let amountMissing = 1;//TODO: add missing amount
-                socket.emit('paymentMissingAmount', amountMissing)
-            } else if (userData.change > 0) {
-                // Has change to spare
-
-
-                if (noNegativeChange) {
-                    // no one has negative change
-                    let leftoverChange = 1//TODO: Add leftover change
-                    socket.emit('leftoverChange', leftoverChange)
-                } else {
-                    // you can pay for someone
-                    // TODO: add who can you pay for
-                    socket.emit('paymentLeftoverChangePayForSomeone', data)
-                }
-
-
-            } else if (userData.change === 0) {
-                // No change
-                socket.emit('paymentNoChange')
-            }
-
-            // ... 
+        if (await Helper.IsGroupReadyByUser(data.userId)) {
+            EmitStateByChange(await Helper.GetUserPaymentData(data.userId))
         }
     })
 
     socket.on('userNotReady', async (userId) => {
-        let group = await Helper.UpdateUserReady(false, userId)
+        await Helper.UpdateUserIsReady(userId, false)
         console.log("Not ready")
-
+        let group = await Helper.GetGroupByUser(userId);
         socket.emit('updateGroup', group)
     })
 
@@ -168,7 +180,6 @@ io.on('connection', (socket) => {
         if (await Helper.IsUserInAnyGroup(userId) === true) {
 
             let group = await Helper.GetGroupByUser(userId);
-
 
             socket.emit('updateGroup', group)
             proceedToPayment()
