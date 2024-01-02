@@ -104,41 +104,49 @@ io.on('connection', (socket) => {
         socket.emit('paymentMissingAmount', amountMissing)
     }
 
-    function CalculateAndEmitDebts(userPaymentData) {
+    function CalculateAndEmitDebts(userPaymentData, group) {
         let noOneOwesMoney = true;
-        if (noOneOwesMoney) {
+
+        //Get all users with negative change
+        let usersInDebt = []
+        group.forEach(user => {
+            if (user.change < 0) {
+                usersInDebt.push(user)
+            }
+        })
+
+        console.log(usersInDebt)
+
+        if (usersInDebt.length === 0) {
             // no one has negative change
 
             socket.emit('leftoverChange', userPaymentData.change)
         } else {
+
+            socket.emit('updateUserInDebt', usersInDebt);
+
+            // TODO: Extract to function, that can be called when accepting payment for another user
             // Somone owes money
             // you can pay for someone
             // TODO: add who can you pay for
+            usersInDebt.forEach(inDebtUser => {
 
-            //Get all users with negative change
+            })
+
+            // When accepting payment for another user
+            // Update the change left in calculation
+            // Update users payForSomeone
+
+            // states:
+            // Enough change
+            // Not enough change
+
             // return those who's abs change is smaller than yours
             // if there are users left that cant be covered, emit appropriate message
-            socket.emit('paymentLeftoverChangePayForSomeone', data)
+            socket.emit('paymentLeftoverChangePayForSomeone')
         }
     }
 
-    function EmitStateByChange(userPaymentData) {
-        // Send to user its state according to their change status
-        let change = userPaymentData.change;
-
-        if (change < 0) {
-            // Owes money
-            CalculateAndEmitMissingAmount(userPaymentData)
-
-        } else if (change > 0) {
-            // Has change to spare
-            CalculateAndEmitDebts(userPaymentData);
-
-        } else if (change === 0) {
-            // No change
-            socket.emit('paymentNoChange')
-        }
-    }
 
     socket.on('userReady', async data => {
         console.log(data)
@@ -149,10 +157,27 @@ io.on('connection', (socket) => {
 
         await Helper.UpdateChangeForParentGroup(data.userId);
 
-        socket.emit('updateGroup', await Helper.GetGroupByUser(data.userId))
+        let group = await Helper.GetGroupByUser(data.userId)
+        socket.emit('updateGroup', group)
 
         if (await Helper.IsGroupReadyByUser(data.userId)) {
-            EmitStateByChange(await Helper.GetUserPaymentData(data.userId))
+
+            let userPaymentData = await Helper.GetUserPaymentData(data.userId)
+            // Send to user its state according to their change status
+            let change = userPaymentData.change;
+
+            if (change < 0) {
+                // Owes money
+                CalculateAndEmitMissingAmount(userPaymentData)
+
+            } else if (change > 0) {
+                // Has change to spare
+                CalculateAndEmitDebts(userPaymentData, group);
+
+            } else if (change === 0) {
+                // No change
+                socket.emit('paymentNoChange')
+            }
         }
     })
 

@@ -39,7 +39,6 @@ enum Auth {
 }
 
 
-
 const App = () => {
     const [isConnected, setIsConnected] = useState(socket.connected);
 

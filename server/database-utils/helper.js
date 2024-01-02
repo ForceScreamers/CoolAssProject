@@ -299,5 +299,8 @@ module.exports = {
             await this.UpdateUserChange(user._id.toString(), change)
         })
     },
+    GetUsersWithNegativeChange:async function(groupId){
+        let group=await this.GetGroupByUser
+    }
 
 }
