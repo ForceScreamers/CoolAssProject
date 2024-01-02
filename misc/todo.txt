@@ -1,19 +1,22 @@
-MongoDB:
-Remember to update the ulimit for the database
-
 General todos:
-Where to run server & database
-
+Where to run server & database - Look into digital ocean droplets
 
 
 React Client:
+* Finish the calculator and payment page
+
 Encrypt client stored userId as token.
+
+Design basic layout of each page
 
 Add page wrapper that shows menu with: profile details, settings, history...
 
-Finish the calculator and payment page
-
+Fix error showing in useNavigation.natigate() parameter
 
 
 Server:
-Look into parameter arguments for mongodb nodejs
+* Look into parameter arguments for mongodb nodejs
+
+
+MongoDB:
+Remember to update the ulimit for the database
