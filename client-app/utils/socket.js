@@ -17,8 +17,8 @@ const PORT = '3000';
 //     return socket;
 // }
 
-console.warn("DEBUG: USING PC LOCAL IP");
-export const socket = io(`http://192.168.178.213:${PORT}`, {
+console.warn("DEBUG: Remember to check IP address!!!!");
+export const socket = io(`http://192.168.152.213:${PORT}`, {
     'reconnection': true,
     'reconnectionDelay': 500,
     'reconnectionAttempts': 10

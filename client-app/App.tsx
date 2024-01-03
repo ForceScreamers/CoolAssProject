@@ -22,7 +22,7 @@ import YouOweSomeone from './pages/PaymentPages/YouOweSomeone'
 import LeftoverChange from './pages/PaymentPages/LeftoverChange'
 import LeftoverChangePayForSomeone from './pages/PaymentPages/LeftoverChangePayForSomeone'
 import SomeoneOwesYou from './pages/PaymentPages/SomeoneOwesYou'
-import InDebtList from './pages/PaymentPages/InDebtListDisplay';
+
 
 
 
@@ -49,7 +49,6 @@ const App = () => {
     const [hasUserId, setHasUserId] = useState(Auth.Loading)
 
     const [missingAmount, setMissingAmount] = useState(0);
-    const [inDebtList, setInDebtList] = useState([]);
 
     async function ReconnectToGroup() {
         console.log('reconnecting to group...')
@@ -122,7 +121,6 @@ const App = () => {
                                 IsManager={isManager}
                                 GroupCode={groupCode}
                                 SetMissingAmount={setMissingAmount}
-                                SetInDebtList={setInDebtList}
                             />}</Stack.Screen>
                         <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
                         <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
@@ -135,7 +133,7 @@ const App = () => {
                         <Stack.Screen name='leftoverChange'>{() => <LeftoverChange />}</Stack.Screen>
                         <Stack.Screen name='leftoverChangePayForSomeone'>{() =>
                             <LeftoverChangePayForSomeone
-                                InDebtList={inDebtList}
+                                GroupList={groupList}
                             ></LeftoverChangePayForSomeone>}</Stack.Screen>
                         <Stack.Screen name='someoneOwesYou'>{() => <SomeoneOwesYou></SomeoneOwesYou>}</Stack.Screen>
 

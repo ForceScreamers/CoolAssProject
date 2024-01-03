@@ -1,11 +1,21 @@
 import { View, Text, StyleSheet, Image, Button } from 'react-native'
 import React, { useEffect } from 'react'
+import { socket } from '../../utils/socket'
+import { GetUserId } from '../../utils/storage'
 
 
-export default function InDebtMember({ Index, Name, AmountMissing, CanPayFor }) {
+export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, DoneWithPayment, Id, SetLeftoverChange }) {
     const nameSize = (100 / Name.length)
-    function HandleCanPayFor() {
-        // TODO: emit update debt list
+
+    async function HandlePayFor() {
+        console.log('paying for')
+        socket.emit('payFor', {
+            creditorId: await GetUserId(),
+            debtorId: Id,
+            amount: MissingAmount
+        })
+        SetLeftoverChange((leftoverChange) => leftoverChange - MissingAmount)
+        // TODO: Update group after pay for
     }
 
     return (
@@ -19,19 +29,25 @@ export default function InDebtMember({ Index, Name, AmountMissing, CanPayFor }) 
                     ?
                     <View style={styles.cell}>
                         <Text style={styles.cellHeaders}>כמה חסר</Text>
-                        <Text style={styles.cellText}>{AmountMissing}</Text>
+                        <Text style={styles.cellText}>{MissingAmount}</Text>
                     </View>
                     :
                     <View style={styles.cell}>
-                        <Text style={styles.cellText}>{AmountMissing}</Text>
+                        <Text style={styles.cellText}>{MissingAmount}</Text>
                     </View>
             }
 
 
 
             {/* If cant pay for, disable and change button title */}
+            {
+                DoneWithPayment
+                    ?
+                    <Button title='paidFor' disabled>שולם!</Button>
+                    :
+                    <Button title={CanPayFor ? 'השלם' : 'חסר עודף'} onPress={() => HandlePayFor()} disabled={!CanPayFor} />
 
-            <Button title={CanPayFor ? 'השלם' : 'חסר עודף'} onPress={HandleCanPayFor} disabled={!CanPayFor} />
+            }
 
             {/* <Image source={IsReady ? checkImage : awaitingImage} style={styles.icon} /> */}
         </View>

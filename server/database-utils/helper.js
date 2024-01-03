@@ -72,7 +72,9 @@ module.exports = {
                 bill: 0,
                 change: 0,
                 is_manager: false,
-                is_ready: false
+                is_ready: false,
+                done_with_payment: false,
+                debtors: []
             })
             .then(result => {
                 userId = result.insertedId;
@@ -81,6 +83,19 @@ module.exports = {
 
         return userId;
 
+    },
+    AddDebtor: async function (creditorId, debtorId, amount) {
+        await db.collection("users").updateOne(
+            { _id: new ObjectId(creditorId) },
+            {
+                $push: {
+                    "debtors": {
+                        userId: new ObjectId(debtorId),
+                        debt_amount: amount
+                    }
+                }
+            }
+        )
     },
 
     // TODO: add group not found
@@ -209,8 +224,11 @@ module.exports = {
                     }
                 })
     },
+    UpdateDoneWithPayment: async function (userId, isDoneWithPayment) {
+        await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { done_with_payment: isDoneWithPayment } })
+    },
     UpdateUserIsReady: async function (userId, isReady) {
-        console.log("🚀 ~ file: helper.js:214 ~ userId:", userId)
+        // console.log("🚀 ~ file: helper.js:214 ~ userId:", userId)
 
         await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { is_ready: isReady } })
 
@@ -299,8 +317,8 @@ module.exports = {
             await this.UpdateUserChange(user._id.toString(), change)
         })
     },
-    GetUsersWithNegativeChange:async function(groupId){
-        let group=await this.GetGroupByUser
-    }
+    // GetUsersWithNegativeChange: async function (groupId) {
+    //     let group = await this.GetGroupByUser
+    // }
 
 }

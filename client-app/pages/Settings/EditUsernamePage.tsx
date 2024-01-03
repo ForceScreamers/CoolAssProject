@@ -38,7 +38,12 @@ export default function EditUsername({ Auth, HasUserId, SetHasUserId }) {
 
     return (
         <View>
-            <GoBackButton />
+            {
+                HasUserId === Auth.HasId ?
+                    <GoBackButton />
+                    :
+                    <></>
+            }
             <Text>איך אתה רוצה שייקראו לך?</Text>
             <TextInput
 

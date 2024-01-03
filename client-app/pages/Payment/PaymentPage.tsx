@@ -9,7 +9,7 @@ import { socket } from '../../utils/socket';
 //TODO: Update total bill + tip while typing
 //TODO: Change layout for manager and normal user
 
-export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmount, SetInDebtList }) {
+export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmount }) {
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(true);
 
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -35,12 +35,14 @@ export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmo
         })
         socket.on('paymentLeftoverChangePayForSomeone', () => {
             //TODO: Show who can you pay for and a button to pay for them
+
+
             navigation.navigate('leftoverChangePayForSomeone')
         })
-        socket.on('updateUserInDebt', usersInDebt => {
-            SetInDebtList(usersInDebt)
+        // socket.on('updateUsersInDebt', usersInDebt => {
 
-        })
+        //     SetInDebtList(usersInDebt)
+        // })
     }, [socket])
 
     useFocusEffect(() => {

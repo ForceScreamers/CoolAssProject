@@ -104,9 +104,8 @@ io.on('connection', (socket) => {
         socket.emit('paymentMissingAmount', amountMissing)
     }
 
-    function CalculateAndEmitDebts(userPaymentData, group) {
-        let noOneOwesMoney = true;
 
+    function ExtractUsersInDebt(group) {
         //Get all users with negative change
         let usersInDebt = []
         group.forEach(user => {
@@ -114,39 +113,8 @@ io.on('connection', (socket) => {
                 usersInDebt.push(user)
             }
         })
-
-        console.log(usersInDebt)
-
-        if (usersInDebt.length === 0) {
-            // no one has negative change
-
-            socket.emit('leftoverChange', userPaymentData.change)
-        } else {
-
-            socket.emit('updateUserInDebt', usersInDebt);
-
-            // TODO: Extract to function, that can be called when accepting payment for another user
-            // Somone owes money
-            // you can pay for someone
-            // TODO: add who can you pay for
-            usersInDebt.forEach(inDebtUser => {
-
-            })
-
-            // When accepting payment for another user
-            // Update the change left in calculation
-            // Update users payForSomeone
-
-            // states:
-            // Enough change
-            // Not enough change
-
-            // return those who's abs change is smaller than yours
-            // if there are users left that cant be covered, emit appropriate message
-            socket.emit('paymentLeftoverChangePayForSomeone')
-        }
+        return usersInDebt;
     }
-
 
     socket.on('userReady', async data => {
         console.log(data)
@@ -172,13 +140,32 @@ io.on('connection', (socket) => {
 
             } else if (change > 0) {
                 // Has change to spare
-                CalculateAndEmitDebts(userPaymentData, group);
+                let usersInDebt = ExtractUsersInDebt(group);
+
+                if (usersInDebt.length === 0) {
+                    // No one has negative change, just send change
+                    // TODO: done with payment
+                    socket.emit('leftoverChange', userPaymentData.change)
+                } else {
+                    //Each client will calculate if can pay for the users that the server sends
+                    socket.emit('paymentLeftoverChangePayForSomeone')
+                }
 
             } else if (change === 0) {
                 // No change
+                // TODO: done with payment
                 socket.emit('paymentNoChange')
             }
         }
+    })
+
+    socket.on('payFor', async data => {
+        console.log('paying for')
+        Helper.AddDebtor(data.creditorId, data.debtorId, data.amount);
+        Helper.UpdateDoneWithPayment(data.debtorId, true);
+
+        let group = await Helper.GetGroupByUser(data.userId);
+        socket.emit('updateGroup', group)
     })
 
     socket.on('userNotReady', async (userId) => {
