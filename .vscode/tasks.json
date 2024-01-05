@@ -20,10 +20,27 @@
             }
         },
         {
+            "label": "runMetro",
+            "type": "shell",
+            "command": "cd client-app;npm start",
+            "problemMatcher": [],
+            "presentation": {
+                "group": "groupA"
+            }
+        },
+        {
             "label": "runBoth",
             "dependsOn": [
                 "runServer",
                 "runAndroid"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "runWifiDebug",
+            "dependsOn": [
+                "runServer",
+                "runMetro"
             ],
             "problemMatcher": []
         }

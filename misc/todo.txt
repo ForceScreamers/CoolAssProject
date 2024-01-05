@@ -13,6 +13,8 @@ Add page wrapper that shows menu with: profile details, settings, history...
 
 Fix error showing in useNavigation.natigate() parameter
 
+Add message when server is not connected
+
 
 Server:
 * Look into parameter arguments for mongodb nodejs
