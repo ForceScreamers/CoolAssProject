@@ -4,7 +4,7 @@ import { socket } from '../../utils/socket'
 import { GetUserId } from '../../utils/storage'
 
 
-export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, DoneWithPayment, Id, SetLeftoverChange }) {
+export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, DoneWithPayment, Id }) {
     const nameSize = (100 / Name.length)
 
     async function HandlePayFor() {
@@ -15,7 +15,6 @@ export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, Do
             debtorId: Id,
             amount: MissingAmount
         })
-        SetLeftoverChange((leftoverChange) => leftoverChange - MissingAmount)
         // TODO: Update group after pay for
     }
 

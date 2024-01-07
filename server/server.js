@@ -100,8 +100,22 @@ io.on('connection', (socket) => {
 
 
     function CalculateAndEmitMissingAmount(userPaymentData) {
-        let amountMissing = userPaymentData.change * -1;
+        let amountMissing = Math.abs(userPaymentData.change);
         socket.emit('paymentMissingAmount', amountMissing)
+    }
+
+    function CalculateAndEmitDebt(userPaymentData) {
+        let usersInDebt = ExtractUsersInDebt(group);
+
+        if (usersInDebt.length === 0) {// No one has negative change, just send change
+
+            socket.emit('leftoverChange', userPaymentData.change)
+            Helper.SetDoneWithPayment(data.userId, true)
+        } else {//Each client will calculate if can pay for the users that the server sends
+
+            socket.emit('paymentLeftoverChangePayForSomeone')
+            Helper.SetDoneWithPayment(data.userId, true)
+        }
     }
 
 
@@ -117,20 +131,20 @@ io.on('connection', (socket) => {
     }
 
     socket.on('userReady', async data => {
-        console.log(data)
-        Helper.UpdateUserIsReady(data.userId, true)
+        // TODO: function is too big!
+        let userId = data.userId;
 
-        // Parse and update the amount and bill in db
-        Helper.UpdateUserPaymentDetails(data.userId, ParsePaymentDetails(data.payment))
+        await Helper.UpdateUserIsReady(userId, true)
 
-        await Helper.UpdateChangeForParentGroup(data.userId);
+        await Helper.UpdateUserPaymentDetails(userId, ParsePaymentDetails(data.payment))// Parse and update the amount and bill in db
 
-        let group = await Helper.GetGroupByUser(data.userId)
-        socket.emit('updateGroup', group)
+        await Helper.UpdateChangeForParentGroup(userId);
 
-        if (await Helper.IsGroupReadyByUser(data.userId)) {
+        socket.emit('updateGroup', await Helper.GetGroupByUser(userId))
 
-            let userPaymentData = await Helper.GetUserPaymentData(data.userId)
+        if (await Helper.IsGroupReadyByUser(userId)) {
+
+            let userPaymentData = await Helper.GetUserPaymentData(userId)
             // Send to user its state according to their change status
             let change = userPaymentData.change;
 
@@ -140,34 +154,31 @@ io.on('connection', (socket) => {
 
             } else if (change > 0) {
                 // Has change to spare
-                let usersInDebt = ExtractUsersInDebt(group);
-
-                if (usersInDebt.length === 0) {
-                    // No one has negative change, just send change
-                    // TODO: done with payment
-                    socket.emit('leftoverChange', userPaymentData.change)
-                } else {
-                    //Each client will calculate if can pay for the users that the server sends
-                    socket.emit('paymentLeftoverChangePayForSomeone')
-                }
+                CalculateAndEmitDebt(userPaymentData)
 
             } else if (change === 0) {
                 // No change
-                // TODO: done with payment
+
                 socket.emit('paymentNoChange')
+                Helper.SetDoneWithPayment(data.userId, true)
             }
         }
     })
 
-    socket.on('payFor', async data => {
+    socket.on('payFor', async (data) => {
         console.log('paying for')
-        Helper.AddDebtor(data.creditorId, data.debtorId, data.amount);
-        // Helper.SubtractCreditorAmount(data.creditorId, data.amount);
-        Helper.UpdateDoneWithPayment(data.debtorId, true);
 
+        Helper.AddDebtor(data.creditorId, data.debtorId, data.amount);
+        Helper.SubtractCreditorAmount(data.creditorId, data.amount);// Subtract to show how much the creditor has left for other or for his own left over change
+        Helper.SetDoneWithPayment(data.debtorId, true);
 
         let group = await Helper.GetGroupByUser(data.creditorId);
         socket.emit('updateGroup', group)
+
+        if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(data.creditorId))) {
+            // TODO: final results screen
+            // TODO: Reset users data, maybe store it as debt history?
+        }
     })
 
     socket.on('userNotReady', async (userId) => {

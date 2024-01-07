@@ -3,7 +3,7 @@ import { FlatList, View, Text } from 'react-native'
 import InDebtMember from './InDebtMember'
 
 
-export default function InDebtListDisplay({ InDebtList, SetLeftoverChange }) {
+export default function InDebtListDisplay({ InDebtList }) {
 
     return (
         <View style={{ flex: 1 }}>
@@ -19,7 +19,6 @@ export default function InDebtListDisplay({ InDebtList, SetLeftoverChange }) {
                         MissingAmount={item.missingAmount}
                         CanPayFor={item.canPayFor}
                         Id={item.id}
-                        SetLeftoverChange={SetLeftoverChange}
                         DoneWithPayment={item.doneWithPayment}
                     />
                 )}

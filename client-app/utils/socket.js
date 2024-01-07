@@ -18,7 +18,7 @@ const PORT = '3000';
 // }
 
 console.warn("DEBUG: Remember to check IP address!!!!");
-export const socket = io(`http://192.168.14.187:${PORT}`, {
+export const socket = io(`http://192.168.152.213:${PORT}`, {
     'reconnection': true,
     'reconnectionDelay': 500,
     'reconnectionAttempts': 10

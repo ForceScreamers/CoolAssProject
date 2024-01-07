@@ -185,6 +185,23 @@ module.exports = {
 
         return groupId;
     },
+    GetGroupById: async function (groupId) {
+        // Get list of user ids
+        let dbUserIds = await db.collection("groups")
+            .find({ _id: new ObjectId(groupId) })
+            .toArray()
+
+        // Parse into list of IDs ONLY
+        let parsedUserIds = []
+        dbUserIds[0].user_ids.forEach(userId => {
+            parsedUserIds.push(userId)
+        })
+
+        // Get the users' data by the list of IDs, ommiting the secret stuff (user_id...)
+        let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).toArray()
+
+        return users;
+    },
     GetGroupByUser: async function (userId) {
         // Get user ids 
         // TODO: Add get group tip to display
@@ -224,7 +241,7 @@ module.exports = {
                     }
                 })
     },
-    UpdateDoneWithPayment: async function (userId, isDoneWithPayment) {
+    SetDoneWithPayment: async function (userId, isDoneWithPayment) {
         console.log("🚀 ~ file: helper.js:228 ~ userId:", userId)
         // console.log("")
         await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { done_with_payment: isDoneWithPayment } })
@@ -325,5 +342,19 @@ module.exports = {
     SubtractCreditorAmount: async function (creditorId, amount) {
         await db.collection("users")
             .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: -amount } })
+    },
+    IsGroupDoneWithPayment: async function (groupId) {
+        // this.GetGroupById
+        let group = await this.GetGroupById(groupId)
+
+        let isDoneWithPayment = true;
+        group.forEach(user => {
+            if (user.done_with_payment === false) {
+                isDoneWithPayment = false;
+            }
+        })
+
+        return isDoneWithPayment;
     }
+
 }

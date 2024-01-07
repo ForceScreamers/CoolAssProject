@@ -78,7 +78,6 @@ export default function LeftoverChangePayForSomeone({ GroupList }) {
             <Text>{leftoverChange}</Text>
             <InDebtListDisplay
                 InDebtList={inDebtList}
-                SetLeftoverChange={setLeftoverChange}
             />
         </View>
 
