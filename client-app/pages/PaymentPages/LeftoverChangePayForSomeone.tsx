@@ -23,15 +23,19 @@ export default function LeftoverChangePayForSomeone({ GroupList }) {
     // TODO: Update group needs to update without alerting to rejoin the group!!!!
     async function GetUsersInDebt(group) {
         //Get all users with negative change
+        console.log("🚀 ~ file: LeftoverChangePayForSomeone.tsx:11 ~ LeftoverChangePayForSomeone ~ inDebtList:", inDebtList)
 
-        let usersInDebt: { username: string, missingAmount: number, canPayFor: boolean }[] = []
+
+        let usersInDebt: { username: string, missingAmount: number, canPayFor: boolean, doneWithPayment: boolean, id: string }[] = []
         group.forEach((user) => {
 
             if (user.change < 0) {
                 usersInDebt.push({
                     username: user.username,
                     missingAmount: Math.abs(user.change),
-                    canPayFor: leftoverChange - Math.abs(user.change) >= 0 ? true : false
+                    canPayFor: leftoverChange - Math.abs(user.change) >= 0 ? true : false,
+                    doneWithPayment: user.done_with_payment,
+                    id: user._id
                 })
             }
         })

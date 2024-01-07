@@ -225,6 +225,8 @@ module.exports = {
                 })
     },
     UpdateDoneWithPayment: async function (userId, isDoneWithPayment) {
+        console.log("🚀 ~ file: helper.js:228 ~ userId:", userId)
+        // console.log("")
         await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { done_with_payment: isDoneWithPayment } })
     },
     UpdateUserIsReady: async function (userId, isReady) {
@@ -320,5 +322,8 @@ module.exports = {
     // GetUsersWithNegativeChange: async function (groupId) {
     //     let group = await this.GetGroupByUser
     // }
-
+    SubtractCreditorAmount: async function (creditorId, amount) {
+        await db.collection("users")
+            .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: -amount } })
+    }
 }

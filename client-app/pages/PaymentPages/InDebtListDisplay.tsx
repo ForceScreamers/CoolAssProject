@@ -18,7 +18,7 @@ export default function InDebtListDisplay({ InDebtList, SetLeftoverChange }) {
                         Name={item.username}
                         MissingAmount={item.missingAmount}
                         CanPayFor={item.canPayFor}
-                        Id={item._id}
+                        Id={item.id}
                         SetLeftoverChange={SetLeftoverChange}
                         DoneWithPayment={item.doneWithPayment}
                     />

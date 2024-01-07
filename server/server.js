@@ -162,9 +162,11 @@ io.on('connection', (socket) => {
     socket.on('payFor', async data => {
         console.log('paying for')
         Helper.AddDebtor(data.creditorId, data.debtorId, data.amount);
+        // Helper.SubtractCreditorAmount(data.creditorId, data.amount);
         Helper.UpdateDoneWithPayment(data.debtorId, true);
 
-        let group = await Helper.GetGroupByUser(data.userId);
+
+        let group = await Helper.GetGroupByUser(data.creditorId);
         socket.emit('updateGroup', group)
     })
 
