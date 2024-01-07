@@ -5,6 +5,7 @@ import DisplayGroupList from './GroupList'
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { socket } from '../../utils/socket';
+import { GetUserId } from '../../utils/storage';
 
 //TODO: Update total bill + tip while typing
 //TODO: Change layout for manager and normal user
@@ -15,8 +16,8 @@ export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmo
     const bottomSheetRef = useRef<BottomSheet>(null);
     const navigation = useNavigation();
 
-    function LeaveGroup() {
-        socket.emit('leaveGroup');
+    async function LeaveGroup() {
+        socket.emit('leaveGroup', await GetUserId());
         navigation.navigate('home');
     }
 

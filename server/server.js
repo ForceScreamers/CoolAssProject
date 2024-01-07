@@ -104,17 +104,17 @@ io.on('connection', (socket) => {
         socket.emit('paymentMissingAmount', amountMissing)
     }
 
-    function CalculateAndEmitDebt(userPaymentData) {
-        let usersInDebt = ExtractUsersInDebt(group);
+    async function CalculateAndEmitDebtorsForUser(userPaymentData, userId) {
+        let usersInDebt = ExtractUsersInDebt(await Helper.GetGroupByUser(userId));
 
         if (usersInDebt.length === 0) {// No one has negative change, just send change
 
             socket.emit('leftoverChange', userPaymentData.change)
-            Helper.SetDoneWithPayment(data.userId, true)
+            Helper.SetDoneWithPayment(userId, true)
         } else {//Each client will calculate if can pay for the users that the server sends
 
             socket.emit('paymentLeftoverChangePayForSomeone')
-            Helper.SetDoneWithPayment(data.userId, true)
+            Helper.SetDoneWithPayment(userId, true)
         }
     }
 
@@ -154,7 +154,7 @@ io.on('connection', (socket) => {
 
             } else if (change > 0) {
                 // Has change to spare
-                CalculateAndEmitDebt(userPaymentData)
+                await CalculateAndEmitDebtorsForUser(userPaymentData, userId)
 
             } else if (change === 0) {
                 // No change
@@ -197,6 +197,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('leaveGroup', userId => {
+        console.log("🚀 ~ file: server.js:200 ~ userId:", userId)
         console.log('leaving group')
         Helper.RemoveUserFromParentGroup(userId)
     })

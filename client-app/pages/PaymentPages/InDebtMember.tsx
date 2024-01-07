@@ -8,14 +8,11 @@ export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, Do
     const nameSize = (100 / Name.length)
 
     async function HandlePayFor() {
-        console.log("🚀 ~ file: InDebtMember.tsx:8 ~ InDebtMember ~ Id:", Id)
-        console.log('paying for')
         socket.emit('payFor', {
             creditorId: await GetUserId(),
             debtorId: Id,
             amount: MissingAmount
         })
-        // TODO: Update group after pay for
     }
 
     return (
@@ -43,7 +40,7 @@ export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, Do
             {
                 DoneWithPayment
                     ?
-                    <Button title='paidFor' disabled>שולם!</Button>
+                    <Button title='שולם' disabled />
                     :
                     <Button title={CanPayFor ? 'השלם' : 'חסר עודף'} onPress={() => HandlePayFor()} disabled={!CanPayFor} />
 

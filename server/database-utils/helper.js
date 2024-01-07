@@ -130,7 +130,8 @@ module.exports = {
             })
     },
     RemoveUserFromParentGroup: async function (userId) {
-        let parentGroupId = await this.GetParentGroupId();
+        console.log("🚀 ~ file: helper.js:133 ~ userId:", userId)
+        let parentGroupId = await this.GetParentGroupId(userId);
 
         console.log(userId)
         console.log(parentGroupId)
@@ -285,6 +286,7 @@ module.exports = {
             .project({ _id: 1 })
             .toArray()
 
+        console.log(dbParentGroupId[0])
         return dbParentGroupId[0]._id.toString();
     },
     GetGroupTip: async function (groupId) {

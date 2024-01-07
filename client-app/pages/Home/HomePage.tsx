@@ -18,6 +18,7 @@ export default function Home({ IsConnected }) {
         }
 
         async function LeaveGroup() {
+            console.log("🚀 ~ file: HomePage.tsx:22 ~ await GetUserId():", await GetUserId())
             socket.emit('leaveGroup', await GetUserId())
             console.log("leaving group...")
         }
