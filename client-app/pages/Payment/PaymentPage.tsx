@@ -7,7 +7,6 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { socket } from '../../utils/socket';
 import { GetUserId } from '../../utils/storage';
 
-//TODO: Update total bill + tip while typing
 //TODO: Change layout for manager and normal user
 
 export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmount }) {
@@ -35,8 +34,6 @@ export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmo
             navigation.navigate('leftoverChange')
         })
         socket.on('paymentLeftoverChangePayForSomeone', () => {
-            //TODO: Show who can you pay for and a button to pay for them
-
 
             navigation.navigate('leftoverChangePayForSomeone')
         })

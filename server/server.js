@@ -135,9 +135,7 @@ io.on('connection', (socket) => {
         let userId = data.userId;
 
         await Helper.UpdateUserIsReady(userId, true)
-
         await Helper.UpdateUserPaymentDetails(userId, ParsePaymentDetails(data.payment))// Parse and update the amount and bill in db
-
         await Helper.UpdateChangeForParentGroup(userId);
 
         socket.emit('updateGroup', await Helper.GetGroupByUser(userId))
@@ -176,6 +174,10 @@ io.on('connection', (socket) => {
         socket.emit('updateGroup', group)
 
         if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(data.creditorId))) {
+            // TODO: Get & emit debtors list from db
+            // TODO: Get creditor id where you appear
+            socket.emit('paymentPayedFor',);
+
             // TODO: final results screen
             // TODO: Reset users data, maybe store it as debt history?
         }
@@ -197,8 +199,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on('leaveGroup', userId => {
-        console.log("🚀 ~ file: server.js:200 ~ userId:", userId)
-        console.log('leaving group')
         Helper.RemoveUserFromParentGroup(userId)
     })
 
@@ -208,6 +208,7 @@ io.on('connection', (socket) => {
             let group = await Helper.GetGroupByUser(userId);
 
             socket.emit('updateGroup', group)
+            Helper.UpdateChangeForParentGroup(userId)
             proceedToPayment()
         }
     })

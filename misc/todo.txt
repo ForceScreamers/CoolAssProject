@@ -5,15 +5,14 @@ Where to run server & database - Look into digital ocean droplets
 React Client:
 * Finish the calculator and payment page
 
-Encrypt client stored userId as token.
+Encrypt client stored userId as token - switch async storage to encrypted async storage (https://github.com/emeraldsanto/react-native-encrypted-storage)
 
 Design basic layout of each page
-
 Add page wrapper that shows menu with: profile details, settings, history...
-
-Fix error showing in useNavigation.natigate() parameter
-
 Add message when server is not connected
+
+Add welcome screen
+Fix error showing in useNavigation.natigate() parameter
 
 
 Server:

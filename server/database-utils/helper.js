@@ -130,7 +130,6 @@ module.exports = {
             })
     },
     RemoveUserFromParentGroup: async function (userId) {
-        console.log("🚀 ~ file: helper.js:133 ~ userId:", userId)
         let parentGroupId = await this.GetParentGroupId(userId);
 
         console.log(userId)
@@ -243,12 +242,10 @@ module.exports = {
                 })
     },
     SetDoneWithPayment: async function (userId, isDoneWithPayment) {
-        console.log("🚀 ~ file: helper.js:228 ~ userId:", userId)
         // console.log("")
         await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { done_with_payment: isDoneWithPayment } })
     },
     UpdateUserIsReady: async function (userId, isReady) {
-        // console.log("🚀 ~ file: helper.js:214 ~ userId:", userId)
 
         await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { is_ready: isReady } })
 
