@@ -8,7 +8,7 @@ import { GetUserId } from '../../utils/storage';
 
 export default function JoinEvent() {
     const [input, setInput] = useState('');
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
 
 
     async function RequestJoinGroup() {

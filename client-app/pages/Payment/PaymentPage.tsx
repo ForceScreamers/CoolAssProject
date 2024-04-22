@@ -1,7 +1,7 @@
 import { View, Text, FlatList, Button, StyleSheet, Pressable, Keyboard, Alert, BackHandler } from 'react-native'
 import React, { useState, useRef, useCallback, useEffect } from 'react'
-import PaymentInput from './PaymentInput'
-import DisplayGroupList from './GroupList'
+import PaymentInput from './components/PaymentInput'
+import DisplayGroupList from './components/GroupList'
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { socket } from '../../utils/socket';
@@ -13,7 +13,7 @@ export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmo
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(true);
 
     const bottomSheetRef = useRef<BottomSheet>(null);
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
 
     async function LeaveGroup() {
         socket.emit('leaveGroup', await GetUserId());

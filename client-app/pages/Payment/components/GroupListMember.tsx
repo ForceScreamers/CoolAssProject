@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet, Image } from 'react-native'
 import React, { useEffect } from 'react'
 
-const checkImage = require('../../assets/check.png')
-const awaitingImage = require('../../assets/awaiting.png')
-const crownImage = require('../../assets/crown.png')
+const checkImage = require('../../../assets/check.png')
+const awaitingImage = require('../../../assets/awaiting.png')
+const crownImage = require('../../../assets/crown.png')
 
 
 export default function GroupListMember({ Index, Bill, Amount, Change, IsReady, Name, IsManager }) {
@@ -11,6 +11,7 @@ export default function GroupListMember({ Index, Bill, Amount, Change, IsReady, 
     const nameSize = (100 / Name.length)
 
     function DisplayCrown() {
+        console.log("Is", IsManager)
         if (IsManager) {
             return (
                 <Image source={crownImage} style={styles.icon} />
@@ -27,7 +28,6 @@ export default function GroupListMember({ Index, Bill, Amount, Change, IsReady, 
             </View>
             <Text style={styles.cell}>|</Text>
 
-            {/* TODO: Turn this into compenent */}
             {
                 Index == 0
                     ?

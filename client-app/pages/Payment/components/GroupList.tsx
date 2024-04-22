@@ -27,7 +27,7 @@ export default function DisplayGroupList({ GroupList }) {
                         Bill={item.bill}
                         Amount={item.amount}
                         IsReady={item.is_ready}
-                        IsManager={item.is_ranager}
+                        IsManager={item.is_manager}
                     />
                 )}
             />

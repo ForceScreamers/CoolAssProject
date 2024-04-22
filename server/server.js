@@ -4,7 +4,7 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const Helper = require('./database-utils/helper');
 const { DEBTOR, CREDITOR } = require('./server-data/consts');
-
+const { USERNAME_MAX_LENGTH } = require('./server-data/consts');
 
 const app = express();
 const server = createServer(app);
@@ -28,7 +28,15 @@ app.get('/', (req, res) => {
 // Helper.CreateGroupForUser("6569c41c4b44a4eb21963617").then(data => console.log(data))
 // })
 
-
+function isUsernameValid(username) {
+    if (username === '') {
+        return false;
+    }
+    if (username.length > USERNAME_MAX_LENGTH) {
+        return false;
+    }
+    return true;
+}
 
 io.on('connection', (socket) => {
 
@@ -41,12 +49,15 @@ io.on('connection', (socket) => {
         console.log("creating new user...")
         console.log("username", data.username)
 
-        // TODO: Validate username and send message accordingly
-        if (data.username !== '') {
+        if (isUsernameValid(data.username)) {
             let userId = await Helper.AddNewUser(data.username)
 
             socket.emit('updateId', { userId: userId })
             proceedToHome()
+        }
+        else {
+            console.log("Invalid")
+            // TODO: Send invalid username message
         }
     })
 
@@ -58,10 +69,10 @@ io.on('connection', (socket) => {
 
 
 
-    socket.on('canCreateGroup', (data) => {
+    socket.on('canCreateGroup', async (data) => {
         console.log('creating group')
 
-        let groupId = Helper.CreateGroupForUser(data.userId)
+        let groupId = await Helper.CreateGroupForUser(data.userId)
 
         if (groupId) {
             socket.emit('createdGroup', { groupCode: groupId });
@@ -94,10 +105,7 @@ io.on('connection', (socket) => {
                 catch (err) {
                     console.error(err);
                 }
-
-
             })
-
         }
         else {
             console.log("not found")
@@ -106,7 +114,6 @@ io.on('connection', (socket) => {
     })
 
     function ParsePaymentDetails(data) {
-        //TODO:create try parse float that returns 0 if isn't float
         let parsedData = {
             amount: parseFloat(data.amount),
             bill: parseFloat(data.bill),
@@ -148,39 +155,36 @@ io.on('connection', (socket) => {
         return usersInDebt;
     }
 
+    async function UpdateUserPaymentData(userId, paymentData) {
+        await Helper.UpdateUserIsReady(userId, true)
+        await Helper.UpdateUserPaymentDetails(userId, ParsePaymentDetails(paymentData))
+        await Helper.UpdateChangeForParentGroup(userId);
+    }
+
     socket.on('userReady', async data => {
-        // TODO: function is too big!
-
-        // ! Debug
-        let dbData = await Helper.GetDebtorsForUser(data.userId);
-
         let userId = data.userId;
 
-        await Helper.UpdateUserIsReady(userId, true)
-        await Helper.UpdateUserPaymentDetails(userId, ParsePaymentDetails(data.payment))// Parse and update the amount and bill in db
-        await Helper.UpdateChangeForParentGroup(userId);
+        await UpdateUserPaymentData(userId, data.payment);
 
         socket.emit('updateGroup', await Helper.GetGroupByUser(userId))
 
         if (await Helper.IsGroupReadyByUser(userId)) {
 
             let userPaymentData = await Helper.GetUserPaymentData(userId)
+
             // Send to user its state according to their change status
             let change = userPaymentData.change;
 
-            if (change < 0) {
-                // Owes money
+            if (change < 0) {// Owes money
                 CalculateAndEmitMissingAmount(userPaymentData)
 
-            } else if (change > 0) {
-                // Has change to spare
-                await CalculateAndEmitDebtorsForUser(userPaymentData, userId)
+            } else if (change > 0) {// Has change to spare
+                CalculateAndEmitDebtorsForUser(userPaymentData, userId)
 
-            } else if (change === 0) {
-                // No change
-
+            } else if (change === 0) {// No change
                 socket.emit('paymentNoChange')
                 Helper.SetDoneWithPayment(data.userId, true)
+
             }
         }
     })

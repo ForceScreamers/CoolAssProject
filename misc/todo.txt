@@ -19,6 +19,8 @@ Fix error showing in useNavigation.natigate() parameter
 Server:
 * Look into parameter arguments for mongodb nodejs
 
+when a user leaves a group, check if its empty and if so, delete it
+
 omit ids when getting data from database
 
 

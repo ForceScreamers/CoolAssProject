@@ -4,10 +4,13 @@ import { useNavigation } from '@react-navigation/native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { socket } from '../../utils/socket';
 import { GetUserId } from '../../utils/storage';
-import ShowReconnectAlert from './ShowReconnectAlert.tsx';
+import ShowReconnectAlert from './components/ShowReconnectAlert.tsx';
+
+
+
 
 export default function Home({ IsConnected }) {
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
 
 
     useEffect(() => {

@@ -193,10 +193,10 @@ module.exports = {
         }
     },
     CreateGroupForUser: async function (userId) {
-        // Assuming the user is in no group
+
         let groupId;
 
-        if (this.IsUserInAnyGroup(userId) == 0) {
+        if (await this.IsUserInAnyGroup(userId) === false) {
             // Add new group
             await db.collection("groups")
                 .insertOne({
@@ -216,6 +216,9 @@ module.exports = {
                     _id: new ObjectId(userId)
                 }, { $set: { is_manager: true } })
                 .catch(err => console.log(err))
+        }
+        else {
+            console.log("cant create group, already in group!")
         }
 
         return groupId;

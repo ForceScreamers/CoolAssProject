@@ -56,7 +56,6 @@ const App = () => {
     async function ReconnectToGroup() {
         console.log('reconnecting to group...')
         // socket.emit('userReconnect', await GetUserId())
-
     }
 
     useEffect(() => {
@@ -85,16 +84,25 @@ const App = () => {
             StoreUserId(data.userId)
         })
 
-        socket.on('updateGroup', data => {
+        socket.on('updateGroup', (data) => {
             setGroupList(data);
-            setIsManager(false);
+            UpdateIsManager(data);
         })
 
         socket.on('createdGroup', data => {
             setGroupCode(data.groupCode);
-            setIsManager(true);
+            UpdateIsManager(data);
         })
 
+        async function UpdateIsManager(data) {
+            let userId = await GetUserId();
+            data.forEach(async user => {
+
+                if (user._id === userId) {
+                    setIsManager(user.is_manager);
+                }
+            })
+        }
 
 
         return () => {

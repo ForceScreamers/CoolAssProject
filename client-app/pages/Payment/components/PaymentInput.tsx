@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, StyleSheet, TextInput, Button, Pressable } from 'react-native';
-import { socket } from '../../utils/socket';
-import UserInputAndTitle from '../../components/ui/UserInputAndTitle';
+import { socket } from '../../../utils/socket';
+import UserInputAndTitle from '../../../components/ui/UserInputAndTitle';
 import TipInputAndDisplay from './TipInputAndDisplay';
-import { GetUserId } from '../../utils/storage';
+import { GetUserId } from '../../../utils/storage';
 
 const ERROR_COLOR = '#FF0000'
 const NORMAL_COLOR = '#70AD47'
@@ -25,10 +25,13 @@ export default function PaymentInput({ IsManager, CollapseSheet, IsBottomSheetOp
     const [amount, setAmount] = useState(-1);
     const [bill, setBill] = useState('');
 
-    const [managerTipValue, setTipValue] = useState(0);
 
     const [amountFieldColor, setAmountFieldColor] = useState(NORMAL_COLOR)
     const [billFieldColor, setBillFieldColor] = useState(NORMAL_COLOR)
+
+    const [managerTipValue, setTipValue] = useState(0);
+
+    const [tipFieldColor, setTipFieldColor] = useState(NORMAL_COLOR);
 
     async function ConfirmPayment() {
         //  Validate money input.
@@ -37,6 +40,12 @@ export default function PaymentInput({ IsManager, CollapseSheet, IsBottomSheetOp
 
         setAmountFieldColor(amountValid ? NORMAL_COLOR : ERROR_COLOR);
         setBillFieldColor(billValid ? NORMAL_COLOR : ERROR_COLOR);
+
+        if (IsManager) {
+            let tipValid = IsNumberValid(managerTipValue);
+
+            setTipFieldColor(tipValid ? NORMAL_COLOR : ERROR_COLOR)
+        }
 
         let userId = await GetUserId();
 
@@ -110,6 +119,7 @@ export default function PaymentInput({ IsManager, CollapseSheet, IsBottomSheetOp
                     IsManager={IsManager}
                     SetTip={setTipValue}
                     TipValue={managerTipValue}
+                    FieldColor={tipFieldColor}
                 />
 
             </View>

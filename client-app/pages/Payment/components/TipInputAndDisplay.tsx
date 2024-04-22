@@ -1,10 +1,13 @@
 import { View, Text, StyleSheet, TextInput } from 'react-native'
 import React from 'react'
-import UserInputAndTitle from '../../components/ui/UserInputAndTitle'
+import UserInputAndTitle from '../../../components/ui/UserInputAndTitle'
 
-export default function TipInputAndDisplay({ IsManager, SetTip, TipValue }) {
+export default function TipInputAndDisplay({ IsManager, SetTip, TipValue, FieldColor }) {
+
     return (
         <View style={styles.tipContainer}>
+            {console.log(IsManager)}
+
             <Text style={{ textAlign: 'center' }}>סה"כ כולל טיפ</Text>
             <View style={{ flexDirection: 'column', alignItems: 'center' }}>
 
@@ -16,16 +19,18 @@ export default function TipInputAndDisplay({ IsManager, SetTip, TipValue }) {
                     placeholderTextColor={'#000000'}
                 />
                 {
-                    IsManager ?
+                    IsManager
+                        ?
                         <UserInputAndTitle
                             TitleSize={0}
                             InputSize={20}
                             StateValue={TipValue}
                             SetState={SetTip}
-                            Title=''
+                            Title='jajaja'
                             MaxLength={2}
                             Type='numeric'
                             PlaceHolder='0%'
+                            FieldColor={FieldColor}
                         />
                         :
                         <Text style={styles.tipText}>(20%)</Text>

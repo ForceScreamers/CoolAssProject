@@ -5,14 +5,16 @@ import { useNavigation } from '@react-navigation/native'
 import { socket } from '../../utils/socket'
 import DisplayGroupList from '../Payment/GroupList';
 import GoBackButton from '../../components/ui/GoBackButton';
+import { GetUserId } from '../../utils/storage';
 
 export default function HostEvent({ GroupCode }) {
 
     const navigation = useNavigation();
 
 
-    function RequestCreateGroup() {
-        socket.emit('canCreateGroup');
+    async function RequestCreateGroup() {
+
+        socket.emit('canCreateGroup', { userId: await GetUserId() });
     }
 
     useEffect(() => {
