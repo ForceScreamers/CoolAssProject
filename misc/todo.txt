@@ -1,6 +1,7 @@
 General todos:
 Where to run server & database - Look into digital ocean droplets
 
+Debt history - save who owes who and how much. Store in a debt collection creditor, debtor and amount (can add date etc...)
 
 React Client:
 * Finish the calculator and payment page
@@ -17,6 +18,8 @@ Fix error showing in useNavigation.natigate() parameter
 
 Server:
 * Look into parameter arguments for mongodb nodejs
+
+omit ids when getting data from database
 
 
 MongoDB:

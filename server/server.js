@@ -3,6 +3,7 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const Helper = require('./database-utils/helper');
+const { DEBTOR, CREDITOR } = require('./server-data/consts');
 
 
 const app = express();
@@ -71,14 +72,23 @@ io.on('connection', (socket) => {
     })
 
     socket.on('requestJoinGroup', async data => {
+        console.log("server 75: req join");
         if (await Helper.IsUserInAnyGroup(data.userId) === false) {
-            await Helper.AddUserToGroupByCode(data.userId, data.groupCode)
+            console.log("Add user:", data);
+            Helper.AddUserToGroupByCode(data.userId, data.groupCode).then(async (test) => {
 
-            let group = await Helper.GetGroupByUser(data.userId);
+                try {
+                    let group = await Helper.GetGroupByUser(data.userId);
+                    socket.emit('updateGroup', group)
 
-            socket.emit('updateGroup', group)
+                    socket.emit('joinedGroup')
+                }
+                catch (err) {
+                    console.error(err);
+                }
 
-            socket.emit('joinedGroup')
+
+            })
 
         }
         else {
@@ -132,6 +142,10 @@ io.on('connection', (socket) => {
 
     socket.on('userReady', async data => {
         // TODO: function is too big!
+
+        // ! Debug
+        let dbData = await Helper.GetDebtorsForUser(data.userId);
+
         let userId = data.userId;
 
         await Helper.UpdateUserIsReady(userId, true)
@@ -166,22 +180,39 @@ io.on('connection', (socket) => {
     socket.on('payFor', async (data) => {
         console.log('paying for')
 
-        Helper.AddDebtor(data.creditorId, data.debtorId, data.amount);
-        Helper.SubtractCreditorAmount(data.creditorId, data.amount);// Subtract to show how much the creditor has left for other or for his own left over change
+        Helper.AddDebt(data.userId, data.debtorId, data.amount);
+        Helper.SubtractCreditorAmount(data.userId, data.amount);// Subtract to show how much the creditor has left for other or for his own left over change
         Helper.SetDoneWithPayment(data.debtorId, true);
 
-        let group = await Helper.GetGroupByUser(data.creditorId);
+        let group = await Helper.GetGroupByUser(data.userId);
         socket.emit('updateGroup', group)
 
-        if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(data.creditorId))) {
-            // TODO: Get & emit debtors list from db
-            // TODO: Get creditor id where you appear
-            socket.emit('paymentPayedFor',);
+        if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(data.userId))) {
+            let debtState = await Helper.GetUserDebtState(data.userId);
 
-            // TODO: final results screen
-            // TODO: Reset users data, maybe store it as debt history?
+            if (debtState === DEBTOR) {
+                let creditors = await Helper.GetCreditorsForUser(data.userId)
+                console.log("🚀 ~ file: server.js:181 ~ creditor:", creditors)
+                socket.emit('paymentPayedFor', { creditor: creditors })
+            } else if (debtState === CREDITOR) {
+                // let dbData = await Helper.GetDebtorsForUser(data.userId);
+                // console.log("🚀 ~ file: server.js:186 ~ debtors:", dbData)
+
+                // let debtors=[]
+                // dbData.debtors.forEach(debtor=>{
+                //     debtors.push({
+                //         amount: debtor.debt_amount,
+                //         username: 
+                //     })
+                // })
+
+
+                // socket.emit('someoneOwesYou', dbData.debtors)
+            }
+
         }
     })
+
 
     socket.on('userNotReady', async (userId) => {
         await Helper.UpdateUserIsReady(userId, false)
@@ -203,6 +234,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('userReconnect', async (userId, proceedToPayment) => {
+        console.log("Reconnecting...");
         if (await Helper.IsUserInAnyGroup(userId) === true) {
 
             let group = await Helper.GetGroupByUser(userId);

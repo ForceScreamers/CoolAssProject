@@ -10,7 +10,9 @@ export default function JoinEvent() {
     const [input, setInput] = useState('');
     const navigation = useNavigation();
 
+
     async function RequestJoinGroup() {
+
         socket.emit('requestJoinGroup', {
             userId: await GetUserId(),
             groupCode: parseInt(input)

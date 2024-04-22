@@ -50,6 +50,9 @@ const App = () => {
 
     const [missingAmount, setMissingAmount] = useState(0);
 
+    const [debtors, setDebtors] = useState([]);
+    const [creditors, setCreditors] = useState([]);
+
     async function ReconnectToGroup() {
         console.log('reconnecting to group...')
         // socket.emit('userReconnect', await GetUserId())
@@ -121,21 +124,30 @@ const App = () => {
                                 IsManager={isManager}
                                 GroupCode={groupCode}
                                 SetMissingAmount={setMissingAmount}
-                            />}</Stack.Screen>
+                            />}
+                        </Stack.Screen>
                         <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
                         <Stack.Screen name='joinEvent'>{() => <JoinEvent />}</Stack.Screen>
                         <Stack.Screen name='editDisplayName'>{() => <EditUsername Auth={Auth} HasUserId={hasUserId} SetHasUserId={setHasUserId} />}</Stack.Screen>
 
                         {/* Payment process screens */}
                         <Stack.Screen name='noChange'>{() => <NoChange />}</Stack.Screen>
-                        <Stack.Screen name='missingAmount'>{() => <MissingAmount MissingAmount={missingAmount} />}</Stack.Screen>
+                        <Stack.Screen name='missingAmount'>{() =>
+                            <MissingAmount MissingAmount={missingAmount}
+                            />}
+                        </Stack.Screen>
                         <Stack.Screen name='youOweSomeone'>{() => <YouOweSomeone />}</Stack.Screen>
                         <Stack.Screen name='leftoverChange'>{() => <LeftoverChange />}</Stack.Screen>
+
                         <Stack.Screen name='leftoverChangePayForSomeone'>{() =>
                             <LeftoverChangePayForSomeone
                                 GroupList={groupList}
+                                SetDebtors={setDebtors}
                             ></LeftoverChangePayForSomeone>}</Stack.Screen>
-                        <Stack.Screen name='someoneOwesYou'>{() => <SomeoneOwesYou></SomeoneOwesYou>}</Stack.Screen>
+
+                        <Stack.Screen name='someoneOwesYou'>{() =>
+                            <SomeoneOwesYou Debtors={debtors} />}
+                        </Stack.Screen>
 
                     </Stack.Navigator>
                 </NavigationContainer>)}

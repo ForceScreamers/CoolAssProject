@@ -9,7 +9,7 @@ export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, Do
 
     async function HandlePayFor() {
         socket.emit('payFor', {
-            creditorId: await GetUserId(),
+            userId: await GetUserId(),
             debtorId: Id,
             amount: MissingAmount
         })

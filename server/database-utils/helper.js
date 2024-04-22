@@ -1,3 +1,4 @@
+const { CREDITOR, DEBTOR, NO_DEBT } = require('../server-data/consts');
 const { connectToDb, getDb } = require('./db')
 const { ObjectId } = require('mongodb')
 
@@ -10,7 +11,7 @@ connectToDb((err) => {
     }
 })
 
-
+let count = 0;
 
 // TODO: Create an error handler for queries instead of catch(()=>{})
 
@@ -74,7 +75,8 @@ module.exports = {
                 is_manager: false,
                 is_ready: false,
                 done_with_payment: false,
-                debtors: []
+                debtors: [],
+                creditors: []
             })
             .then(result => {
                 userId = result.insertedId;
@@ -84,7 +86,13 @@ module.exports = {
         return userId;
 
     },
-    AddDebtor: async function (creditorId, debtorId, amount) {
+    AddDebt: async function (creditorId, debtorId, amount) {
+        // Adding to both the creditor & the debtor allows to access the data more easily, 
+        // but when the debt is removed or updated, it MUST be done for both the creditor
+        // and the debtor.
+
+        // Add amount and id to debtor
+        // TODO: Add if already owes to someone, increment the debt by the amount instead of adding another debt
         await db.collection("users").updateOne(
             { _id: new ObjectId(creditorId) },
             {
@@ -96,28 +104,47 @@ module.exports = {
                 }
             }
         )
+
+        // Add amount and id to creditor
+        await db.collection("users").updateOne(
+            { _id: new ObjectId(debtorId) },
+            {
+                $push: {
+                    "creditors": {
+                        userId: new ObjectId(creditorId),
+                        debt_amount: amount
+                    }
+                }
+            }
+        )
     },
 
     // TODO: add group not found
     AddUserToGroupById: async function (userId, groupId) {
-
+        let test = true;
         await db.collection("groups")
             .updateOne(
                 { _id: new ObjectId(groupId) },
                 { $addToSet: { user_ids: new ObjectId(userId) } })
             .catch((err) => {
-                console.log(err)
+                test = false;
+                console.error(err)
             })
+
+        return test;
 
     },
     AddUserToGroupByCode: async function (userId, groupCode) {
 
         // Get group id by group code
+
+
         let groupId = await db.collection("groups")
             .find({ code: groupCode })
             .toArray()
 
-        this.AddUserToGroupById(userId, groupId[0]._id.toString());
+
+        return this.AddUserToGroupById(userId, groupId[0]._id.toString());
     },
     RemoveUserFromGivenGroup: async function (userId, groupId) {
 
@@ -135,13 +162,20 @@ module.exports = {
         console.log(userId)
         console.log(parentGroupId)
 
-        await db.collection("groups")
-            .updateOne(
-                { _id: new ObjectId(parentGroupId) },
-                { $pull: { user_ids: new ObjectId(userId) } })
-            .catch((err) => {
-                console.log(err)
-            })
+        if (parentGroupId) {
+            await db.collection("groups")
+                .updateOne(
+                    { _id: new ObjectId(parentGroupId) },
+                    { $pull: { user_ids: new ObjectId(userId) } })
+                .catch((err) => {
+                    console.log(err)
+                })
+        }
+        else {
+            console.log("helper 175: no parent group ID");
+        }
+
+
     },
     IsUserInAnyGroup: async function (userId) {
         // TODO: Consider searching with an index
@@ -205,13 +239,14 @@ module.exports = {
     GetGroupByUser: async function (userId) {
         // Get user ids 
         // TODO: Add get group tip to display
+
+
         let dbUserIds = await db.collection("groups")
             .find({
                 user_ids: { $in: [new ObjectId(userId)] }
             })
             .toArray()
 
-        console.log(userId)
 
         // Parse into list of IDs ONLY
         let parsedUserIds = []
@@ -354,6 +389,82 @@ module.exports = {
         })
 
         return isDoneWithPayment;
+    },
+    GetCreditorsForUser: async function (userId) {
+        //from group get all users
+        // let parentGroup = await this.GetGroupById(this.GetParentGroupId(userId))
+
+        //foreach group-user, if the userId appears in debtors, return group-user id
+        let creditors = await db.collection("users")
+            .find({ _id: new ObjectId(userId) })
+            .project({ creditors: 1 })
+            .toArray()
+        // console.log("🚀 ~ file: helper.js:386 ~ creditor:", creditor)
+
+
+        if (creditors.length === 0) {
+            return null;
+        }
+        else {
+            return creditors[0]
+        }
+    },
+    GetDebtorsForUser: async function (userId) {
+        let debtors = await db.collection("users")
+            .aggregate([
+                { "$unwind": "$debtors" },
+                {
+                    "$lookup": {
+                        "from": "users",
+                        "localField": "debtors.userId",
+                        "foreignField": "_id", "as": "n_cost"
+                    }
+                },
+                { "$unwind": "$n_cost" },
+                {
+                    "$group": {
+                        "_id": "$_id",
+                        "username": { "$first": "$n_cost.username" },
+                        "debt": { "$first": "$debtors.debt_amount" },
+                        // "debt": { "$first": "$n_cost" }
+                    }
+                }
+                // { "$out": "results" }
+            ])
+            .toArray()
+
+
+        console.log("🚀 ~ file: helper.js:431 ~ debtors[0]:", debtors[0])
+        if (debtors.length === 0) {
+            return null;
+        }
+        else {
+            return debtors[0]
+        }
+    },
+    GetUserDebtState: async function (userId) {
+        let stateCount = await db.collection("users")
+            .aggregate([
+                {
+                    $match: { _id: new ObjectId(userId) }
+                },
+                {
+                    $project: {
+                        creditorsCount: { $size: "$creditors" },
+                        debtorsCount: { $size: "$debtors" }
+                    }
+                }
+            ])
+            .toArray()
+
+        console.log("🚀 ~ file: helper.js:411 ~ stateCount[0]:", stateCount[0])
+        if (stateCount[0].creditorsCount > 0 && stateCount[0].debtorsCount === 0) {
+            return DEBTOR;
+        } else if (stateCount[0].creditorsCount === 0 && stateCount[0].debtorsCount > 0) {
+            return CREDITOR;
+        } else {
+            return NO_DEBT;
+        }
     }
 
 }

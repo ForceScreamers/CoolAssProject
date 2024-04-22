@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import InDebtListDisplay from './InDebtListDisplay';
 import { GetUserId } from '../../utils/storage';
 
-export default function LeftoverChangePayForSomeone({ GroupList }) {
+export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
 
     const [inDebtList, setInDebtList] = useState([]);
     const [leftoverChange, setLeftoverChange] = useState(0)
@@ -13,9 +13,12 @@ export default function LeftoverChangePayForSomeone({ GroupList }) {
     const navigation = useNavigation()
 
     useEffect(() => {
-        socket.on('paymentPayedFor', data => {
-            // TODO: data: who owes you and how much
-            navigation.navigate('youOweSomeone');
+        socket.on('someoneOwesYou', debtors => {
+            // console.log("🚀 ~ file: LeftoverChangePayForSomeone.tsx:17 ~ data:", data)
+            // TODO: Set someone owes you
+
+            SetDebtors(debtors);
+            navigation.navigate('someoneOwesYou');
         })
     }, [socket])
 
