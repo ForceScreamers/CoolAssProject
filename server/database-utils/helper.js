@@ -26,14 +26,22 @@ module.exports = {
             })
         return users;
     },
-    UserIsExists: async function (userId) {
+    DoesGroupExistByCode: async function (groupCode) {
+        let groupCount = await db.collection("groups")
+            .count({
+                code: groupCode
+            })
+            .catch(err => console.log(err))
+        return groupCount == 0 ? false : true
+    },
+    DoesUserExist: async function (userId) {
         // Check if exists
         let userCount = await db.collection("users")
             .count({
                 _id: new ObjectId(userId)
             })
             .catch(err => console.log(err))
-        return userCount == 0
+        return userCount == 0 ? false : true
     },
     GetUserPaymentData: async function (userId) {
         let userData = await db.collection("users")
@@ -119,9 +127,7 @@ module.exports = {
         )
     },
 
-    // TODO: add group not found
     AddUserToGroupById: async function (userId, groupId) {
-        let test = true;
         await db.collection("groups")
             .updateOne(
                 { _id: new ObjectId(groupId) },
@@ -130,14 +136,9 @@ module.exports = {
                 test = false;
                 console.error(err)
             })
-
-        return test;
-
     },
     AddUserToGroupByCode: async function (userId, groupCode) {
-
         // Get group id by group code
-
 
         let groupId = await db.collection("groups")
             .find({ code: groupCode })

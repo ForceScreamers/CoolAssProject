@@ -73,9 +73,17 @@ io.on('connection', (socket) => {
 
     socket.on('requestJoinGroup', async data => {
         console.log("server 75: req join");
-        if (await Helper.IsUserInAnyGroup(data.userId) === false) {
-            console.log("Add user:", data);
-            Helper.AddUserToGroupByCode(data.userId, data.groupCode).then(async (test) => {
+
+        let userId = data.userId;
+        let groupCode = data.groupCode;
+
+        let alreadyInGroup = await Helper.IsUserInAnyGroup(userId);
+        let doesGroupExist = await Helper.DoesGroupExistByCode(groupCode);
+
+
+        if (!alreadyInGroup && doesGroupExist) {
+
+            Helper.AddUserToGroupByCode(userId, groupCode).then(async () => {
 
                 try {
                     let group = await Helper.GetGroupByUser(data.userId);
