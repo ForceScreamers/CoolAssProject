@@ -1,4 +1,4 @@
-const { CREDITOR, DEBTOR, NO_DEBT } = require('../server-data/consts');
+const { DEBT_STATE } = require('../server-data/consts');
 const { connectToDb, getDb } = require('./db')
 const { ObjectId } = require('mongodb')
 
@@ -99,6 +99,8 @@ module.exports = {
         // Adding to both the creditor & the debtor allows to access the data more easily, 
         // but when the debt is removed or updated, it MUST be done for both the creditor
         // and the debtor.
+
+        // await db.collection("debts").
 
         // Add amount and id to debtor
         // TODO: Add if already owes to someone, increment the debt by the amount instead of adding another debt
@@ -459,15 +461,15 @@ module.exports = {
             .toArray()
 
 
-        console.log("🚀 ~ file: helper.js:431 ~ debtors[0]:", debtors[0])
+
         if (debtors.length === 0) {
             return null;
         }
         else {
-            return debtors[0]
+            return debtors
         }
     },
-    GetUserDebtState: async function (userId) {
+    EvalUserDebtState: async function (userId) {
         let stateCount = await db.collection("users")
             .aggregate([
                 {
@@ -484,11 +486,11 @@ module.exports = {
 
         console.log("🚀 ~ file: helper.js:411 ~ stateCount[0]:", stateCount[0])
         if (stateCount[0].creditorsCount > 0 && stateCount[0].debtorsCount === 0) {
-            return DEBTOR;
+            return DEBT_STATE.DEBTOR;
         } else if (stateCount[0].creditorsCount === 0 && stateCount[0].debtorsCount > 0) {
-            return CREDITOR;
+            return DEBT_STATE.CREDITOR;
         } else {
-            return NO_DEBT;
+            return DEBT_STATE.NO_DEBT;
         }
     }
 

@@ -28,24 +28,33 @@ export default function GroupListMember({ Index, Bill, Amount, Change, IsReady, 
             </View>
             <Text style={styles.cell}>|</Text>
 
-            {
+            {/* {
                 Index == 0
                     ?
                     <View style={styles.cell}>
-                        <Text style={styles.cellHeaders}>חשבון</Text>
+                        <Text style={styles.cellHeaders}>עודף</Text>
                         <Text style={styles.cellText}>{Change}</Text>
                     </View>
                     :
                     <View style={styles.cell}>
                         <Text style={styles.cellText}>{Change}</Text>
                     </View>
-            }
+            } */}
 
-            <Text style={styles.cell}>|</Text>
-            <Text style={styles.cell}>{Bill}</Text>
-            <Text style={styles.cell}>|</Text>
-            <Text style={styles.cell}>{Amount}</Text>
-            <Text style={styles.cell}>|</Text>
+            <View style={styles.cell}>
+                <Text style={styles.cellHeaders}>עודף</Text>
+                <Text style={styles.cellText}> {Change}</Text>
+            </View>
+
+            <View style={styles.cell}>
+                <Text style={styles.cellHeaders}>חשבון</Text>
+                <Text style={styles.cellText}> {Bill}</Text>
+            </View>
+
+            <View style={styles.cell}>
+                <Text style={styles.cellHeaders}>בפועל</Text>
+                <Text style={styles.cellText}> {Amount}</Text>
+            </View>
 
             <Image source={IsReady ? checkImage : awaitingImage} style={styles.icon} />
         </View>

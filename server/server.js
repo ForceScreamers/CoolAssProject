@@ -3,7 +3,7 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const Helper = require('./database-utils/helper');
-const { DEBTOR, CREDITOR } = require('./server-data/consts');
+const { DEBT_STATE } = require('./server-data/consts');
 const { USERNAME_MAX_LENGTH } = require('./server-data/consts');
 
 const app = express();
@@ -200,15 +200,22 @@ io.on('connection', (socket) => {
         socket.emit('updateGroup', group)
 
         if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(data.userId))) {
-            let debtState = await Helper.GetUserDebtState(data.userId);
+            let debtState = await Helper.EvalUserDebtState(data.userId);
+            console.log("🚀 ~ debtState:", debtState)
 
-            if (debtState === DEBTOR) {
+
+
+
+            if (debtState === DEBT_STATE.DEBTOR) {
                 let creditors = await Helper.GetCreditorsForUser(data.userId)
                 console.log("🚀 ~ file: server.js:181 ~ creditor:", creditors)
                 socket.emit('paymentPayedFor', { creditor: creditors })
-            } else if (debtState === CREDITOR) {
+            } else if (debtState === DEBT_STATE.CREDITOR) {
+                let debtors = await Helper.GetDebtorsForUser(data.userId);
+
+
                 // let dbData = await Helper.GetDebtorsForUser(data.userId);
-                // console.log("🚀 ~ file: server.js:186 ~ debtors:", dbData)
+                console.log("🚀 ~ file: server.js:186 ~ debtors:", debtors)
 
                 // let debtors=[]
                 // dbData.debtors.forEach(debtor=>{
@@ -219,7 +226,7 @@ io.on('connection', (socket) => {
                 // })
 
 
-                // socket.emit('someoneOwesYou', dbData.debtors)
+                socket.emit('someoneOwesYou', debtors)
             }
 
         }

@@ -14,10 +14,10 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
 
     useEffect(() => {
         socket.on('someoneOwesYou', debtors => {
-            // console.log("🚀 ~ file: LeftoverChangePayForSomeone.tsx:17 ~ data:", data)
             // TODO: Set someone owes you
 
             SetDebtors(debtors);
+            console.log("🚀 ~ debtors:", debtors)
             navigation.navigate('someoneOwesYou');
         })
     }, [socket])
@@ -44,7 +44,7 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
         return usersInDebt;
     }
 
-    async function ExtractLeftoverChange(group) {
+    async function GetLeftoverChange(group) {
         let selfId = await GetUserId();
         let selfChange = 0;
         group.forEach(user => {
@@ -58,7 +58,7 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
     //  First, update self change 
     useEffect(() => {
         async function UpdateLeftoverChange() {
-            setLeftoverChange(await ExtractLeftoverChange(GroupList))
+            setLeftoverChange(await GetLeftoverChange(GroupList))
         }
         UpdateLeftoverChange()
     }, [GroupList])
