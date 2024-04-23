@@ -96,37 +96,16 @@ module.exports = {
 
     },
     AddDebt: async function (creditorId, debtorId, amount) {
-        // Adding to both the creditor & the debtor allows to access the data more easily, 
-        // but when the debt is removed or updated, it MUST be done for both the creditor
-        // and the debtor.
+        // * currently passing usernames as well as ids to make the lookup easier, in the future can maybe use only 
+        // * ids and join the documents
 
-        // await db.collection("debts").
-
-        // Add amount and id to debtor
-        // TODO: Add if already owes to someone, increment the debt by the amount instead of adding another debt
-        await db.collection("users").updateOne(
-            { _id: new ObjectId(creditorId) },
+        await db.collection("debts").updateOne(
             {
-                $push: {
-                    "debtors": {
-                        userId: new ObjectId(debtorId),
-                        debt_amount: amount
-                    }
-                }
-            }
-        )
-
-        // Add amount and id to creditor
-        await db.collection("users").updateOne(
-            { _id: new ObjectId(debtorId) },
-            {
-                $push: {
-                    "creditors": {
-                        userId: new ObjectId(creditorId),
-                        debt_amount: amount
-                    }
-                }
-            }
+                creditor_id: new ObjectId(creditorId),
+                debtor_id: new ObjectId(debtorId),
+            },
+            { $inc: { amount: amount } },
+            { upsert: true }
         )
     },
 
@@ -421,11 +400,44 @@ module.exports = {
         //from group get all users
         // let parentGroup = await this.GetGroupById(this.GetParentGroupId(userId))
 
-        //foreach group-user, if the userId appears in debtors, return group-user id
-        let creditors = await db.collection("users")
-            .find({ _id: new ObjectId(userId) })
-            .project({ creditors: 1 })
-            .toArray()
+        //  Get every document where the user is in debt
+        // let creditors = await db.collection("debts")
+        //     .find({ debtor_id: new ObjectId(userId) })
+        //     .project({ _id: 0 })
+        //     .toArray()
+
+        let creditors = await db.collection("debts").aggregate([
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "creditor_id",
+                    foreignField: "user._id",
+                    as: "ds"
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    ds: {
+                        "$filter": {
+                            "input": "$ds",
+                            "cond": {
+                                $eq: [
+                                    "$$this.creditor_id",
+                                    new ObjectId(userId)
+                                    /* Filter value */
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        ])
+
+        // let creditors = await db.collection("users")
+        // .find({ _id: new ObjectId(userId) })
+        // .project({ creditors: 1 })
+        // .toArray()
         // console.log("🚀 ~ file: helper.js:386 ~ creditor:", creditor)
 
 
@@ -433,34 +445,55 @@ module.exports = {
             return null;
         }
         else {
-            return creditors[0]
+            return creditors
         }
     },
     GetDebtorsForUser: async function (userId) {
-        let debtors = await db.collection("users")
-            .aggregate([
-                { "$unwind": "$debtors" },
-                {
-                    "$lookup": {
-                        "from": "users",
-                        "localField": "debtors.userId",
-                        "foreignField": "_id", "as": "n_cost"
-                    }
-                },
-                { "$unwind": "$n_cost" },
-                {
-                    "$group": {
-                        "_id": "$_id",
-                        "username": { "$first": "$n_cost.username" },
-                        "debt": { "$first": "$debtors.debt_amount" },
-                        // "debt": { "$first": "$n_cost" }
-                    }
+        // let debtors = await db.collection("debts")
+        //     .find({ creditor_id: new ObjectId(userId) })
+        //     .project({ _id: 0 })
+        //     .toArray()
+
+        // ! Need to swap maybe the debtor id to creditor id...
+        let debtors = await db.collection("debts").aggregate([
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "debtor_id",
+                    foreignField: "_id",
+                    as: "deb"
                 }
-                // { "$out": "results" }
-            ])
-            .toArray()
+            },
+            {
+                $match: {
+                    "deb._id": new ObjectId(userId)
+                }
+            },
+            {
+                $unwind: "$deb"
+            },
+            {
+                $project: {
+                    "deb.username": 1,
+                    "amount": 1
+                }
+            }]).toArray()
 
 
+
+        // let debtors = await db.collection("debts").aggregate([
+        //     {
+        //         $lookup: {
+        //             from: "users",
+        //             localField: "debtor_id",
+        //             foreignField: "_id",
+        //             as: "deb"
+        //         }
+        //     },
+
+        // ]).toArray()
+
+        console.log(debtors);
 
         if (debtors.length === 0) {
             return null;

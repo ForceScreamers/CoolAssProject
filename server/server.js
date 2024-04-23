@@ -205,7 +205,6 @@ io.on('connection', (socket) => {
 
 
 
-
             if (debtState === DEBT_STATE.DEBTOR) {
                 let creditors = await Helper.GetCreditorsForUser(data.userId)
                 console.log("🚀 ~ file: server.js:181 ~ creditor:", creditors)
