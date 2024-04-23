@@ -11,7 +11,8 @@ connectToDb((err) => {
     }
 })
 
-let count = 0;
+// ! debug
+let groupCount = 0;
 
 // TODO: Create an error handler for queries instead of catch(()=>{})
 
@@ -127,6 +128,22 @@ module.exports = {
         )
     },
 
+    GroupIsEmpty: async function (groupId) {
+        let count = await this.GetGroupUserCount(groupId)
+
+        return count == 0
+    },
+    DeleteGroup: async function (groupId) {
+        //!debug
+        groupCount--;
+
+        await db.collection("groups")
+            .deleteOne(
+                { _id: new ObjectId(groupId) }
+            )
+
+    },
+
     AddUserToGroupById: async function (userId, groupId) {
         await db.collection("groups")
             .updateOne(
@@ -176,7 +193,7 @@ module.exports = {
             console.log("helper 175: no parent group ID");
         }
 
-
+        return parentGroupId;
     },
     IsUserInAnyGroup: async function (userId) {
         // TODO: Consider searching with an index
@@ -194,6 +211,9 @@ module.exports = {
     },
     CreateGroupForUser: async function (userId) {
 
+        // !debug
+        groupCount++;
+
         let groupId;
 
         if (await this.IsUserInAnyGroup(userId) === false) {
@@ -201,7 +221,8 @@ module.exports = {
             await db.collection("groups")
                 .insertOne({
                     user_ids: [new ObjectId(userId)],
-                    tip_percent: 0
+                    tip_percent: 0,
+                    code: groupCount
                 })
                 .then(result => {
                     groupId = result.insertedId;

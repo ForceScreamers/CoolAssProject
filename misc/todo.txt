@@ -13,13 +13,13 @@ Add page wrapper that shows menu with: profile details, settings, history...
 Add message when server is not connected
 
 Add welcome screen
-Fix error showing in useNavigation.natigate() parameter
 
 
 Server:
 * Look into parameter arguments for mongodb nodejs
 
-when a user leaves a group, check if its empty and if so, delete it
+every period of time, check for empty groups and delete them? 
+every period of time, check for groups with users that don't exist and delete them? 
 
 omit ids when getting data from database
 

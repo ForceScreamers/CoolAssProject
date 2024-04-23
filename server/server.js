@@ -241,8 +241,12 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('leaveGroup', userId => {
-        Helper.RemoveUserFromParentGroup(userId)
+    socket.on('leaveGroup', async userId => {
+        let groupId = await Helper.RemoveUserFromParentGroup(userId)
+
+        if (await Helper.GroupIsEmpty(groupId)) {
+            await Helper.DeleteGroup(groupId);
+        }
     })
 
     socket.on('userReconnect', async (userId, proceedToPayment) => {

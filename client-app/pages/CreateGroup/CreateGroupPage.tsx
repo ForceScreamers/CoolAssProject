@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 
 import { socket } from '../../utils/socket'
-import DisplayGroupList from '../Payment/GroupList';
+import DisplayGroupList from '../Payment/components/GroupList';
 import GoBackButton from '../../components/ui/GoBackButton';
 import { GetUserId } from '../../utils/storage';
 
