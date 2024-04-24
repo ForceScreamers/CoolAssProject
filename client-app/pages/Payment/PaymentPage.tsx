@@ -34,7 +34,7 @@ export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmo
             navigation.navigate('leftoverChange')
         })
         socket.on('paymentLeftoverChangePayForSomeone', () => {
-
+            console.log("HEllo :3")
             navigation.navigate('leftoverChangePayForSomeone')
         })
         // socket.on('updateUsersInDebt', usersInDebt => {

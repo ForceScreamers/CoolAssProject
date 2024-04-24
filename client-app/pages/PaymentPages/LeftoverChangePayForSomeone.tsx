@@ -10,20 +10,31 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
     const [inDebtList, setInDebtList] = useState([]);
     const [leftoverChange, setLeftoverChange] = useState(0)
 
+    const [count, setCount] = useState(0);
+
     const navigation = useNavigation()
 
     useEffect(() => {
-        socket.on('someoneOwesYou', debtors => {
-            // TODO: Set someone owes you
+        setCount(count => count + 1);
 
+        socket.on('someoneOwesYou', debtors => {
             SetDebtors(debtors);
-            console.log("🚀 ~ debtors:", debtors)
+
             navigation.navigate('someoneOwesYou');
         })
+
+        if (IsDoneWithPayment()) {
+            console.log("going to someone owes you")
+            navigation.navigate('someoneOwesYou');
+        }
     }, [socket])
 
+    useEffect(() => {
+        // If done with payment, navigate to someone owes you
+        console.log('count: ', count)
+    }, [count])
+
     // TODO: Update group needs to update without alerting to rejoin the group!!!!
-    //? why async
     function GetUsersInDebt(group) {
         //Get all users with negative change
 
@@ -43,6 +54,17 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
 
 
         return usersInDebt;
+    }
+
+    function IsDoneWithPayment() {
+        let usersInDebt = GetUsersInDebt(GroupList);
+
+        usersInDebt.forEach(user => {
+            if (user.canPayFor) {
+                return false;
+            }
+        })
+        return true;
     }
 
     async function GetLeftoverChange(group) {
@@ -67,21 +89,11 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
     //  Then, update the in debt list, according to the self change
     useEffect(() => {
         async function UpdateUsersInDebt() {
-            let usersIbDebt = GetUsersInDebt(GroupList);
-
-            let isDoneWithPayment = true;
-            usersIbDebt.forEach(user => {
-                if (user.canPayFor) {
-                    isDoneWithPayment = false;
-                }
-            })
-
-            if (isDoneWithPayment) {
+            if (IsDoneWithPayment()) {
                 socket.emit('doneWithPayment', { userId: await GetUserId() })
             }
 
-
-            setInDebtList(usersIbDebt);
+            setInDebtList(GetUsersInDebt(GroupList));
         }
         UpdateUsersInDebt()
     }, [leftoverChange])

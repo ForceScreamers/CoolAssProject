@@ -4,14 +4,12 @@ import { socket } from '../../utils/socket';
 import { useNavigation } from '@react-navigation/native';
 
 export default function SomeoneOwesYou({ Debtors }) {
-    const navigation = useNavigation()
-
 
 
     useEffect(() => {
         console.log("someone owes you!", Debtors)
 
-    }, [Debtors])
+    }, [])
 
 
     return (
@@ -22,7 +20,7 @@ export default function SomeoneOwesYou({ Debtors }) {
                     data={Debtors}
                     keyExtractor={(item, index) => item.id}
                     renderItem={({ item, index }) => (
-                        <Text>{item.username} {item.debt}</Text>
+                        <Text>{index}: {item.deb.username} {item.amount}</Text>
                         // <GroupListMember
                         //     Index={index}
                         //     key={item.id}

@@ -190,8 +190,9 @@ io.on('connection', (socket) => {
     })
 
     socket.on('doneWithPayment', async (data) => {
-        await Helper.SetDoneWithPayment(data.userId);
+        await Helper.SetDoneWithPayment(data.userId, true);
     })
+
 
     socket.on('payFor', async (data) => {
         console.log('paying for')
@@ -213,36 +214,38 @@ io.on('connection', (socket) => {
 
         if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(data.userId))) {
 
-            //let debtState = await Helper.EvalUserDebtState(data.userId);
-
+            let debtState = await Helper.EvalUserDebtState(data.userId);
+            console.log("Group is Done with payment")
             // If user is in debt
             // if -- is a creditor
             // If user is even
-            let creditors = await Helper.GetCreditorsForUser(data.userId)
+            // let creditors = await Helper.GetCreditorsForUser(data.userId)
 
-            socket.emit('paymentPayedFor', { creditor: creditors })
-
-            if (debtState === DEBT_STATE.DEBTOR) {
-
-            } else if (debtState === DEBT_STATE.CREDITOR) {
-
-
-                let debtors = await Helper.GetDebtorsForUser(data.userId);
+            // socket.emit('paymentPayedFor', { creditor: creditors })
+            // If user is 
+            let debtors = await Helper.GetDebtorsForUser(data.userId);
+            socket.emit('someoneOwesYou', debtors)
 
 
-                // let dbData = await Helper.GetDebtorsForUser(data.userId);
+            // if (debtState === DEBT_STATE.DEBTOR) {
 
-                // let debtors=[]
-                // dbData.debtors.forEach(debtor=>{
-                //     debtors.push({
-                //         amount: debtor.debt_amount,
-                //         username: 
-                //     })
-                // })
+            // } else if (debtState === DEBT_STATE.CREDITOR) {
 
 
-                socket.emit('someoneOwesYou', debtors)
-            }
+
+
+            // let dbData = await Helper.GetDebtorsForUser(data.userId);
+
+            // let debtors=[]
+            // dbData.debtors.forEach(debtor=>{
+            //     debtors.push({
+            //         amount: debtor.debt_amount,
+            //         username: 
+            //     })
+            // })
+
+
+            // }
 
         }
     })
@@ -271,7 +274,7 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('userReconnect', async (userId, proceedToPayment) => {
+    socket.on('userReconnect', async (userId, navigateToPayment) => {
         console.log("Reconnecting...");
         if (await Helper.IsUserInAnyGroup(userId) === true) {
 
@@ -279,7 +282,12 @@ io.on('connection', (socket) => {
 
             socket.emit('updateGroup', group)
             Helper.UpdateChangeForParentGroup(userId)
-            proceedToPayment()
+            navigateToPayment()
+
+            if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(userId))) {
+                // let debtors = await Helper.GetDebtorsForUser(userId);
+                // socket.emit('someoneOwesYou', debtors)
+            }
         }
     })
 

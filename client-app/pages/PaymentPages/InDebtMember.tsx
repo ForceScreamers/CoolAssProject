@@ -8,6 +8,8 @@ export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, Do
     const nameSize = (100 / Name.length)
 
     async function HandlePayFor() {
+
+
         socket.emit('payFor', {
             userId: await GetUserId(),
             debtorId: Id,
