@@ -189,32 +189,48 @@ io.on('connection', (socket) => {
         }
     })
 
+    socket.on('doneWithPayment', async (data) => {
+        await Helper.SetDoneWithPayment(data.userId);
+    })
+
     socket.on('payFor', async (data) => {
         console.log('paying for')
 
-        Helper.AddDebt(data.userId, data.debtorId, data.amount);
-        Helper.SubtractCreditorAmount(data.userId, data.amount);// Subtract to show how much the creditor has left for other or for his own left over change
-        Helper.SetDoneWithPayment(data.debtorId, true);
+        // Create or update debt between the user and the other one
+        await Helper.AddDebt(data.userId, data.debtorId, data.amount);
 
+        // Subtract to show how much the creditor has left for other or for his own left over change
+        await Helper.SubtractCreditorAmount(data.userId, data.amount);
+
+        //  User in DEBT is done (other user)
+        await Helper.SetDoneWithPayment(data.debtorId, true);
+
+
+
+        // Update group
         let group = await Helper.GetGroupByUser(data.userId);
-        socket.emit('updateGroup', group)
+        socket.emit('updateGroup', group);
 
         if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(data.userId))) {
-            let debtState = await Helper.EvalUserDebtState(data.userId);
-            console.log("🚀 ~ debtState:", debtState)
 
+            //let debtState = await Helper.EvalUserDebtState(data.userId);
 
+            // If user is in debt
+            // if -- is a creditor
+            // If user is even
+            let creditors = await Helper.GetCreditorsForUser(data.userId)
+
+            socket.emit('paymentPayedFor', { creditor: creditors })
 
             if (debtState === DEBT_STATE.DEBTOR) {
-                let creditors = await Helper.GetCreditorsForUser(data.userId)
-                console.log("🚀 ~ file: server.js:181 ~ creditor:", creditors)
-                socket.emit('paymentPayedFor', { creditor: creditors })
+
             } else if (debtState === DEBT_STATE.CREDITOR) {
+
+
                 let debtors = await Helper.GetDebtorsForUser(data.userId);
 
 
                 // let dbData = await Helper.GetDebtorsForUser(data.userId);
-                console.log("🚀 ~ file: server.js:186 ~ debtors:", debtors)
 
                 // let debtors=[]
                 // dbData.debtors.forEach(debtor=>{

@@ -383,6 +383,7 @@ module.exports = {
         await db.collection("users")
             .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: -amount } })
     },
+
     IsGroupDoneWithPayment: async function (groupId) {
         // this.GetGroupById
         let group = await this.GetGroupById(groupId)
@@ -406,33 +407,33 @@ module.exports = {
         //     .project({ _id: 0 })
         //     .toArray()
 
-        let creditors = await db.collection("debts").aggregate([
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "creditor_id",
-                    foreignField: "user._id",
-                    as: "ds"
-                }
-            },
-            {
-                $project: {
-                    _id: 1,
-                    ds: {
-                        "$filter": {
-                            "input": "$ds",
-                            "cond": {
-                                $eq: [
-                                    "$$this.creditor_id",
-                                    new ObjectId(userId)
-                                    /* Filter value */
-                                ]
-                            }
-                        }
-                    }
-                }
-            }
-        ])
+        // let creditors = await db.collection("debts").aggregate([
+        //     {
+        //         $lookup: {
+        //             from: "users",
+        //             localField: "creditor_id",
+        //             foreignField: "user._id",
+        //             as: "ds"
+        //         }
+        //     },
+        //     {
+        //         $project: {
+        //             _id: 1,
+        //             ds: {
+        //                 "$filter": {
+        //                     "input": "$ds",
+        //                     "cond": {
+        //                         $eq: [
+        //                             "$$this.creditor_id",
+        //                             new ObjectId(userId)
+        //                             /* Filter value */
+        //                         ]
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // ])
 
         // let creditors = await db.collection("users")
         // .find({ _id: new ObjectId(userId) })
@@ -441,19 +442,19 @@ module.exports = {
         // console.log("🚀 ~ file: helper.js:386 ~ creditor:", creditor)
 
 
-        if (creditors.length === 0) {
-            return null;
-        }
-        else {
-            return creditors
-        }
+        // if (creditors.length === 0) {
+        //     return null;
+        // }
+        // else {
+        //     return creditors
+        // }
     },
     GetDebtorsForUser: async function (userId) {
         // let debtors = await db.collection("debts")
         //     .find({ creditor_id: new ObjectId(userId) })
         //     .project({ _id: 0 })
         //     .toArray()
-
+        console.log("getting debtors")
         // ! Need to swap maybe the debtor id to creditor id...
         let debtors = await db.collection("debts").aggregate([
             {
@@ -464,11 +465,11 @@ module.exports = {
                     as: "deb"
                 }
             },
-            {
-                $match: {
-                    "deb._id": new ObjectId(userId)
-                }
-            },
+            // {
+            //     $match: {
+            //         "deb._id": new ObjectId(userId)
+            //     }
+            // },
             {
                 $unwind: "$deb"
             },
@@ -493,7 +494,8 @@ module.exports = {
 
         // ]).toArray()
 
-        console.log(debtors);
+        // console.log(debtors);
+        console.log("🚀 497 ~ debtors:", debtors)
 
         if (debtors.length === 0) {
             return null;
@@ -503,6 +505,7 @@ module.exports = {
         }
     },
     EvalUserDebtState: async function (userId) {
+        console.log("eval");
         let stateCount = await db.collection("users")
             .aggregate([
                 {

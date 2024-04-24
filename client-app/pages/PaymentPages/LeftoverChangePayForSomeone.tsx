@@ -23,7 +23,8 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
     }, [socket])
 
     // TODO: Update group needs to update without alerting to rejoin the group!!!!
-    async function GetUsersInDebt(group) {
+    //? why async
+    function GetUsersInDebt(group) {
         //Get all users with negative change
 
         let usersInDebt: { username: string, missingAmount: number, canPayFor: boolean, doneWithPayment: boolean, id: string }[] = []
@@ -66,7 +67,21 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
     //  Then, update the in debt list, according to the self change
     useEffect(() => {
         async function UpdateUsersInDebt() {
-            setInDebtList(await GetUsersInDebt(GroupList))
+            let usersIbDebt = GetUsersInDebt(GroupList);
+
+            let isDoneWithPayment = true;
+            usersIbDebt.forEach(user => {
+                if (user.canPayFor) {
+                    isDoneWithPayment = false;
+                }
+            })
+
+            if (isDoneWithPayment) {
+                socket.emit('doneWithPayment', { userId: await GetUserId() })
+            }
+
+
+            setInDebtList(usersIbDebt);
         }
         UpdateUsersInDebt()
     }, [leftoverChange])
