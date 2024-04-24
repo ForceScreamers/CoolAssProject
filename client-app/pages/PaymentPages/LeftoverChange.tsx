@@ -1,10 +1,46 @@
-import { View, Text } from 'react-native'
+import { View, Text, StyleSheet, Pressable } from 'react-native'
 import React from 'react'
+import { useNavigation } from '@react-navigation/native'
+import { socket } from '../../utils/socket';
+import { GetUserId } from '../../utils/storage';
 
-export default function LeftoverChange() {
+export default function LeftoverChange({ Change }) {
+    const navigation = useNavigation()
+
+    async function HandleFinished() {
+        navigation.navigate('home');
+        socket.emit('leaveGroup', await GetUserId());
+    }
+
     return (
         <View>
-            <Text>נשאר לך עודף</Text>
+            <Text>נשאר לך עודף {Change}</Text>
+            <View style={styles.buttonContainer} >
+                <Pressable style={styles.button} onPress={HandleFinished}>
+                    <Text style={styles.buttonText}>סיימתי!</Text>
+                </Pressable>
+            </View>
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+
+    buttonText: {
+        fontSize: 35,
+        color: 'black'
+    },
+    buttonContainer: {
+        alignItems: 'center'
+    },
+    button: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 50,
+        borderRadius: 4,
+        elevation: 3,
+        backgroundColor: '#70AD47',
+        borderWidth: 1,
+    }
+})

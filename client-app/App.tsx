@@ -49,6 +49,7 @@ const App = () => {
     const [hasUserId, setHasUserId] = useState(Auth.Loading)
 
     const [missingAmount, setMissingAmount] = useState(0);
+    const [leftoverChange, setLeftoverChange] = useState(0);
 
     const [debtors, setDebtors] = useState([]);
     const [creditors, setCreditors] = useState([]);
@@ -132,6 +133,7 @@ const App = () => {
                                 IsManager={isManager}
                                 GroupCode={groupCode}
                                 SetMissingAmount={setMissingAmount}
+                                SetLeftoverChange={setLeftoverChange}
                             />}
                         </Stack.Screen>
                         <Stack.Screen name='hostEvent'>{() => <HostEvent GroupCode={groupCode} />}</Stack.Screen>
@@ -145,7 +147,9 @@ const App = () => {
                             />}
                         </Stack.Screen>
                         <Stack.Screen name='youOweSomeone'>{() => <YouOweSomeone />}</Stack.Screen>
-                        <Stack.Screen name='leftoverChange'>{() => <LeftoverChange />}</Stack.Screen>
+                        <Stack.Screen name='leftoverChange'>{() =>
+                            <LeftoverChange Change={leftoverChange} />
+                        }</Stack.Screen>
 
                         <Stack.Screen name='leftoverChangePayForSomeone'>{() =>
                             <LeftoverChangePayForSomeone

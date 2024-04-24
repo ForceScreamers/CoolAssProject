@@ -10,13 +10,10 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
     const [inDebtList, setInDebtList] = useState([]);
     const [leftoverChange, setLeftoverChange] = useState(0)
 
-    const [count, setCount] = useState(0);
 
     const navigation = useNavigation()
 
     useEffect(() => {
-        setCount(count => count + 1);
-
         socket.on('someoneOwesYou', debtors => {
             SetDebtors(debtors);
 
@@ -29,10 +26,7 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
         }
     }, [socket])
 
-    useEffect(() => {
-        // If done with payment, navigate to someone owes you
-        console.log('count: ', count)
-    }, [count])
+
 
     // TODO: Update group needs to update without alerting to rejoin the group!!!!
     function GetUsersInDebt(group) {

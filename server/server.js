@@ -214,7 +214,7 @@ io.on('connection', (socket) => {
 
         if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(data.userId))) {
 
-            let debtState = await Helper.EvalUserDebtState(data.userId);
+            // let debtState = await Helper.EvalUserDebtState(data.userId);
             console.log("Group is Done with payment")
             // If user is in debt
             // if -- is a creditor

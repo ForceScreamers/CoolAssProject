@@ -50,10 +50,7 @@ export default function PaymentInput({ IsManager, CollapseSheet, IsBottomSheetOp
         let userId = await GetUserId();
 
         if (amountValid && billValid) {
-            CollapseSheet();
-        }
-
-        if (amountValid && billValid) {
+            // CollapseSheet();
 
             socket.emit('userReady', {
                 userId: userId,

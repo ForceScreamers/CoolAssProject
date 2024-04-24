@@ -1,15 +1,21 @@
-import { View, Text, FlatList } from 'react-native'
+import { View, Text, FlatList, Pressable, StyleSheet } from 'react-native'
 import React, { useEffect } from 'react'
 import { socket } from '../../utils/socket';
 import { useNavigation } from '@react-navigation/native';
+import { GetUserId } from '../../utils/storage';
 
 export default function SomeoneOwesYou({ Debtors }) {
-
+    const navigation = useNavigation();
 
     useEffect(() => {
         console.log("someone owes you!", Debtors)
 
     }, [])
+
+    async function HandleFinished() {
+        navigation.navigate('home');
+        socket.emit('leaveGroup', await GetUserId());
+    }
 
 
     return (
@@ -36,7 +42,35 @@ export default function SomeoneOwesYou({ Debtors }) {
                 // Debtors.map((debtor, i) => {
                 //     return (<Text>{debtor.debt_amount} {debtor.username}</Text>)
                 // })
+
             }
+            <View style={styles.buttonContainer} >
+                <Pressable style={styles.button} onPress={HandleFinished}>
+                    <Text style={styles.buttonText}>סיימתי!</Text>
+                </Pressable>
+            </View>
         </View>
     )
 }
+
+
+const styles = StyleSheet.create({
+
+    buttonText: {
+        fontSize: 35,
+        color: 'black'
+    },
+    buttonContainer: {
+        alignItems: 'center'
+    },
+    button: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 50,
+        borderRadius: 4,
+        elevation: 3,
+        backgroundColor: '#70AD47',
+        borderWidth: 1,
+    }
+})

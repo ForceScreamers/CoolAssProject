@@ -9,7 +9,7 @@ import { GetUserId } from '../../utils/storage';
 
 //TODO: Change layout for manager and normal user
 
-export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmount }) {
+export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmount, SetLeftoverChange }) {
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(true);
 
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -25,12 +25,12 @@ export default function Payment({ GroupList, IsManager, GroupCode, SetMissingAmo
             navigation.navigate('noChange')
         })
         socket.on('paymentMissingAmount', (missingAmount) => {
-            //TODO: display missing amount
             SetMissingAmount(missingAmount)
             navigation.navigate('missingAmount')
         })
         socket.on('leftoverChange', change => {
             console.log(change)//TODO: show leftover change
+            SetLeftoverChange(change)
             navigation.navigate('leftoverChange')
         })
         socket.on('paymentLeftoverChangePayForSomeone', () => {
