@@ -83,7 +83,7 @@ module.exports = {
                 change: 0,
                 is_manager: false,
                 is_ready: false,
-                done_with_payment: false,
+                done_with_leftover: false,
                 debtors: [],
                 creditors: []
             })
@@ -286,6 +286,9 @@ module.exports = {
         // console.log("")
         await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { done_with_payment: isDoneWithPayment } })
     },
+    SetDoneWithLeftover: async function (userId, isDoneWithLeftover) {
+        await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { done_with_leftover: isDoneWithLeftover } })
+    },
     UpdateUserIsReady: async function (userId, isReady) {
 
         await db.collection("users").updateOne({ _id: new ObjectId(userId) }, { $set: { is_ready: isReady } })
@@ -384,18 +387,18 @@ module.exports = {
             .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: -amount } })
     },
 
-    IsGroupDoneWithPayment: async function (groupId) {
+    IsGroupDoneWithLeftover: async function (groupId) {
         // this.GetGroupById
         let group = await this.GetGroupById(groupId)
 
-        let isDoneWithPayment = true;
+        let isDoneWithLeftover = true;
         group.forEach(user => {
-            if (user.done_with_payment === false) {
-                isDoneWithPayment = false;
+            if (user.done_with_leftover === false) {
+                isDoneWithLeftover = false;
             }
         })
 
-        return isDoneWithPayment;
+        return isDoneWithLeftover;
     },
     GetCreditorsForUser: async function (userId) {
         //from group get all users

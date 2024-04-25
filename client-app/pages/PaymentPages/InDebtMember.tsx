@@ -1,21 +1,39 @@
 import { View, Text, StyleSheet, Image, Button } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { socket } from '../../utils/socket'
 import { GetUserId } from '../../utils/storage'
 
 
-export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, DoneWithPayment, Id }) {
+export default function InDebtMember({ Index, Name, MissingAmount, DoneWithLeftover, CanPayFor, Id }) {
+    const [showCancelPayFor, setShowCancelPayFor] = useState(false);
+
     const nameSize = (100 / Name.length)
 
     async function HandlePayFor() {
-
-
         socket.emit('payFor', {
             userId: await GetUserId(),
             debtorId: Id,
             amount: MissingAmount
+        }, () => {
+            // display status
+            console.log("show cancel")
+            setShowCancelPayFor(true);
         })
     }
+
+    async function CancelPayFor() {
+        socket.emit('cancelPayFor', {
+            userId: await GetUserId(),
+            debtorId: Id,
+        }, () => {
+            // display status
+            setShowCancelPayFor(false);
+        })
+    }
+
+    useEffect(() => {
+        console.log("EEEEEEE", DoneWithLeftover);
+    }, [DoneWithLeftover])
 
     return (
 
@@ -40,9 +58,21 @@ export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, Do
 
             {/* If cant pay for, disable and change button title */}
             {
-                DoneWithPayment
+                DoneWithLeftover
                     ?
-                    <Button title='שולם' disabled />
+                    <View style={styles.payForContainer}>
+
+                        <Button title='שולם' disabled />
+
+                        {
+                            showCancelPayFor
+                                ?
+                                <Button title='בטל' onPress={() => CancelPayFor()} />
+                                :
+                                <></>
+                        }
+
+                    </View>
                     :
                     <Button title={CanPayFor ? 'השלם' : 'חסר עודף'} onPress={() => HandlePayFor()} disabled={!CanPayFor} />
 
@@ -54,6 +84,11 @@ export default function InDebtMember({ Index, Name, MissingAmount, CanPayFor, Do
 }
 
 const styles = StyleSheet.create({
+    payForContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: 100
+    },
     rowContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',

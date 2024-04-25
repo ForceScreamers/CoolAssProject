@@ -193,26 +193,23 @@ io.on('connection', (socket) => {
         await Helper.SetDoneWithPayment(data.userId, true);
     })
 
+    socket.on('doneWithLeftover', async (data) => {
+        await Helper.SetDoneWithLeftover(data.userId, true);
 
-    socket.on('payFor', async (data) => {
-        console.log('paying for')
+        if (await Helper.IsGroupDoneWithLeftover(await Helper.GetParentGroupId(data.userId))) {
 
-        // Create or update debt between the user and the other one
-        await Helper.AddDebt(data.userId, data.debtorId, data.amount);
+            //  Update debts for every user
+            leftover.forEach(async leftoverData => {
+                // Create or update debt between the user and the other one
+                await Helper.AddDebt(leftoverData.userId, leftoverData.debtorId, leftoverData.amount);
 
-        // Subtract to show how much the creditor has left for other or for his own left over change
-        await Helper.SubtractCreditorAmount(data.userId, data.amount);
+                // Subtract to show how much the creditor has left for other or for his own left over change
+                await Helper.SubtractCreditorAmount(leftoverData.userId, leftoverData.amount);
 
-        //  User in DEBT is done (other user)
-        await Helper.SetDoneWithPayment(data.debtorId, true);
+                //  User in DEBT is done (other user)
+                await Helper.SetDoneWithPayment(leftoverData.debtorId, true);
+            })
 
-
-
-        // Update group
-        let group = await Helper.GetGroupByUser(data.userId);
-        socket.emit('updateGroup', group);
-
-        if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(data.userId))) {
 
             // let debtState = await Helper.EvalUserDebtState(data.userId);
             console.log("Group is Done with payment")
@@ -251,6 +248,49 @@ io.on('connection', (socket) => {
     })
 
 
+
+
+    let leftover = [];
+    socket.on('payFor', async (data, enableCancelOption) => {
+        console.log('paying for')
+
+        leftover.push({
+            creditor: data.userId,
+            debtor: data.debtorId,
+            amount: data.amount
+        })
+
+        console.log(leftover);
+
+
+
+        // Update group
+
+        await Helper.SetDoneWithLeftover(data.debtorId, true);
+        let group = await Helper.GetGroupByUser(data.userId);
+        // console.log(group)
+        socket.emit('updateGroup', group);
+
+        // enableCancelOption();
+    })
+
+    socket.on('cancelPayFor', async (data, disableCancelOption) => {
+
+        let payToCancel = leftover.find(pay => {
+            return pay.creditor === data.userId && pay.debtor === data.debtorId
+        })
+
+        leftover.splice(leftover.indexOf(payToCancel))
+
+        await Helper.SetDoneWithLeftover(data.debtorId, true);
+        let group = await Helper.GetGroupByUser(data.userId);
+        // console.log(group)
+        socket.emit('updateGroup', group);
+
+        disableCancelOption();
+    })
+
+
     socket.on('userNotReady', async (userId) => {
         await Helper.UpdateUserIsReady(userId, false)
         console.log("Not ready")
@@ -284,7 +324,7 @@ io.on('connection', (socket) => {
             Helper.UpdateChangeForParentGroup(userId)
             navigateToPayment()
 
-            if (await Helper.IsGroupDoneWithPayment(await Helper.GetParentGroupId(userId))) {
+            if (await Helper.IsGroupDoneWithLeftover(await Helper.GetParentGroupId(userId))) {
                 // let debtors = await Helper.GetDebtorsForUser(userId);
                 // socket.emit('someoneOwesYou', debtors)
             }

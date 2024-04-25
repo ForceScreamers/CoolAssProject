@@ -20,10 +20,10 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
             navigation.navigate('someoneOwesYou');
         })
 
-        if (IsDoneWithPayment()) {
-            console.log("going to someone owes you")
-            navigation.navigate('someoneOwesYou');
-        }
+        // if (IsDoneWithPayment()) {
+        //     console.log("going to someone owes you")
+        //     navigation.navigate('someoneOwesYou');
+        // }
     }, [socket])
 
 
@@ -32,7 +32,7 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
     function GetUsersInDebt(group) {
         //Get all users with negative change
 
-        let usersInDebt: { username: string, missingAmount: number, canPayFor: boolean, doneWithPayment: boolean, id: string }[] = []
+        let usersInDebt: { username: string, missingAmount: number, canPayFor: boolean, doneWithLeftover: boolean, id: string }[] = []
         group.forEach((user) => {
 
             if (user.change < 0) {
@@ -40,12 +40,13 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
                     username: user.username,
                     missingAmount: Math.abs(user.change),
                     canPayFor: leftoverChange - Math.abs(user.change) >= 0 ? true : false,
-                    doneWithPayment: user.done_with_payment,
+                    doneWithLeftover: user.done_with_leftover,
                     id: user._id
                 })
             }
         })
 
+        console.log("🚀 ~ doneWithLeftover:", usersInDebt)
 
         return usersInDebt;
     }
@@ -92,6 +93,11 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
         UpdateUsersInDebt()
     }, [leftoverChange])
 
+
+    async function DoneWithLeftover() {
+        socket.emit('doneWithLeftover', { userId: await GetUserId() })
+    }
+
     return (
         <View style={{ flex: 1 }}>
             <Text>נשאר לך עודף, תשלים למישהו</Text>
@@ -99,6 +105,8 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
             <InDebtListDisplay
                 InDebtList={inDebtList}
             />
+
+            <Button title="סיים" onPress={DoneWithLeftover} />
         </View>
 
     )

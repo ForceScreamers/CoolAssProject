@@ -19,7 +19,8 @@ export default function InDebtListDisplay({ InDebtList }) {
                         MissingAmount={item.missingAmount}
                         CanPayFor={item.canPayFor}
                         Id={item.id}
-                        DoneWithPayment={item.doneWithPayment}
+                        DoneWithLeftover={item.doneWithLeftover}
+
                     />
                 )}
             />
