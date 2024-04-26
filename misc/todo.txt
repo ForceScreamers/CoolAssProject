@@ -15,6 +15,7 @@ Add message when server is not connected
 
 
 Server:
+* ONCE a group has finished a payment, reset all it's members' parameters to default!
 * Look into parameter arguments for mongodb nodejs
 
 every period of time, check for empty groups and delete them? 

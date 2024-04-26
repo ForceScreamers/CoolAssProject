@@ -193,63 +193,28 @@ io.on('connection', (socket) => {
         await Helper.SetDoneWithPayment(data.userId, true);
     })
 
-    socket.on('doneWithLeftover', async (data) => {
-        await Helper.SetDoneWithLeftover(data.userId, true);
 
-        if (await Helper.IsGroupDoneWithLeftover(await Helper.GetParentGroupId(data.userId))) {
+    function CanPayForSomeone(userId, group) {
+        group.forEach(member => {
+            if (member._id != userId) {//isnt me
+                if (!member.done_with_leftover) {
+                    return false;
+                }
+            }
 
-            //  Update debts for every user
-            leftover.forEach(async leftoverData => {
-                // Create or update debt between the user and the other one
-                await Helper.AddDebt(leftoverData.userId, leftoverData.debtorId, leftoverData.amount);
+        })
+        return true;
+    }
 
-
-
-                //  User in DEBT is done (other user)
-                await Helper.SetDoneWithPayment(leftoverData.debtorId, true);
-            })
-
-
-            // let debtState = await Helper.EvalUserDebtState(data.userId);
-            console.log("Group is Done with payment")
-            // If user is in debt
-            // if -- is a creditor
-            // If user is even
-            // let creditors = await Helper.GetCreditorsForUser(data.userId)
-
-            // socket.emit('paymentPayedFor', { creditor: creditors })
-            // If user is 
-            let debtors = await Helper.GetDebtorsForUser(data.userId);
-            socket.emit('someoneOwesYou', debtors)
-
-
-            // if (debtState === DEBT_STATE.DEBTOR) {
-
-            // } else if (debtState === DEBT_STATE.CREDITOR) {
-
-
-
-
-            // let dbData = await Helper.GetDebtorsForUser(data.userId);
-
-            // let debtors=[]
-            // dbData.debtors.forEach(debtor=>{
-            //     debtors.push({
-            //         amount: debtor.debt_amount,
-            //         username: 
-            //     })
-            // })
-
-
-            // }
-
-        }
-    })
-
-
-
-
+    let leftoverData = []
     socket.on('payFor', async (data, enableCancelOption) => {
+
+        leftoverData.push({
+            creditorId: data.userId,
+            debtorId: data.debtorId,
+            amount: data.amount
+        })
+
         // Subtract to show how much the creditor has left for other or for his own left over change
         await Helper.SubtractCreditorAmount(data.userId, data.amount);
 
@@ -257,10 +222,50 @@ io.on('connection', (socket) => {
 
         socket.emit('updateGroup', await Helper.GetGroupByUser(data.userId));
 
+        let group = await Helper.GetGroupByUser(data.userId)
+
+
+        // If I have no one else to cover (don't have enough money or everyone else is payed for...)
+        if (CanPayForSomeone(data.userId, group)) {
+            // Then I am done with leftover
+            await Helper.SetDoneWithLeftover(data.userId, true);
+
+
+            // TODO: socket.emit('creditorMessageDoneWithLeftover')
+        }
+
+        //  Check if everyone with missing money is covered
+        if (await Helper.IsGroupDoneWithLeftover(await Helper.GetParentGroupId(data.userId))) {
+            console.log("Group is Done with payment")
+
+            //  Update debts for every user
+            leftoverData.forEach(async debtData => {
+                // Create or update debt
+                await Helper.AddDebt(debtData.userId, debtData.debtorId, debtData.amount);
+
+                //  User in DEBT is done (other user)
+                await Helper.SetDoneWithPayment(debtData.debtorId, true);
+            })
+
+
+            // let creditors = await Helper.GetCreditorsForUser(data.userId)
+            // socket.emit('paymentPayedFor', { creditor: creditors })
+
+            let debtors = await Helper.GetDebtorsForUser(data.userId);
+            socket.emit('someoneOwesYou', debtors)
+        }
+
+
         enableCancelOption();
     })
 
     socket.on('cancelPayFor', async (data, disableCancelOption) => {
+        let payToCancel = leftoverData.find(pay => {
+            return pay.creditorId === data.userId && pay.debtorId === data.debtorId
+        })
+
+        leftoverData.splice(leftoverData.indexOf(payToCancel))
+
         await Helper.SetDoneWithLeftover(data.debtorId, false);
 
         // Add to show how much the creditor has left for other or for his own left over change
