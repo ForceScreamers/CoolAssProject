@@ -33,6 +33,7 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
         //Get all users with negative change
 
         let usersInDebt: { username: string, missingAmount: number, canPayFor: boolean, doneWithLeftover: boolean, id: string }[] = []
+        // console.log()
         group.forEach((user) => {
 
             if (user.change < 0) {
@@ -91,7 +92,7 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
             setInDebtList(GetUsersInDebt(GroupList));
         }
         UpdateUsersInDebt()
-    }, [leftoverChange])
+    }, [GroupList, leftoverChange])
 
 
     async function DoneWithLeftover() {

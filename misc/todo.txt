@@ -12,7 +12,6 @@ Design basic layout of each page
 Add page wrapper that shows menu with: profile details, settings, history...
 Add message when server is not connected
 
-Add welcome screen
 
 
 Server:

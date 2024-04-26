@@ -203,8 +203,7 @@ io.on('connection', (socket) => {
                 // Create or update debt between the user and the other one
                 await Helper.AddDebt(leftoverData.userId, leftoverData.debtorId, leftoverData.amount);
 
-                // Subtract to show how much the creditor has left for other or for his own left over change
-                await Helper.SubtractCreditorAmount(leftoverData.userId, leftoverData.amount);
+
 
                 //  User in DEBT is done (other user)
                 await Helper.SetDoneWithPayment(leftoverData.debtorId, true);
@@ -250,42 +249,24 @@ io.on('connection', (socket) => {
 
 
 
-    let leftover = [];
     socket.on('payFor', async (data, enableCancelOption) => {
-        console.log('paying for')
-
-        leftover.push({
-            creditor: data.userId,
-            debtor: data.debtorId,
-            amount: data.amount
-        })
-
-        console.log(leftover);
-
-
-
-        // Update group
+        // Subtract to show how much the creditor has left for other or for his own left over change
+        await Helper.SubtractCreditorAmount(data.userId, data.amount);
 
         await Helper.SetDoneWithLeftover(data.debtorId, true);
-        let group = await Helper.GetGroupByUser(data.userId);
-        // console.log(group)
-        socket.emit('updateGroup', group);
 
-        // enableCancelOption();
+        socket.emit('updateGroup', await Helper.GetGroupByUser(data.userId));
+
+        enableCancelOption();
     })
 
     socket.on('cancelPayFor', async (data, disableCancelOption) => {
+        await Helper.SetDoneWithLeftover(data.debtorId, false);
 
-        let payToCancel = leftover.find(pay => {
-            return pay.creditor === data.userId && pay.debtor === data.debtorId
-        })
+        // Add to show how much the creditor has left for other or for his own left over change
+        await Helper.AddCreditorAmount(data.userId, data.amount);
 
-        leftover.splice(leftover.indexOf(payToCancel))
-
-        await Helper.SetDoneWithLeftover(data.debtorId, true);
-        let group = await Helper.GetGroupByUser(data.userId);
-        // console.log(group)
-        socket.emit('updateGroup', group);
+        socket.emit('updateGroup', await Helper.GetGroupByUser(data.userId));
 
         disableCancelOption();
     })

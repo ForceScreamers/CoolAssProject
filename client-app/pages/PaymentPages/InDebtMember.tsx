@@ -25,6 +25,7 @@ export default function InDebtMember({ Index, Name, MissingAmount, DoneWithLefto
         socket.emit('cancelPayFor', {
             userId: await GetUserId(),
             debtorId: Id,
+            amount: MissingAmount
         }, () => {
             // display status
             setShowCancelPayFor(false);

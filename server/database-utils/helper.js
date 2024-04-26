@@ -386,6 +386,10 @@ module.exports = {
         await db.collection("users")
             .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: -amount } })
     },
+    AddCreditorAmount: async function (creditorId, amount) {
+        await db.collection("users")
+            .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: amount } })
+    },
 
     IsGroupDoneWithLeftover: async function (groupId) {
         // this.GetGroupById
