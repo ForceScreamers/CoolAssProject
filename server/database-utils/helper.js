@@ -71,21 +71,21 @@ module.exports = {
 
     //     return users;
     // },
-    AddNewUser: async function (username) {
+    AddNewUser: async function (username, defaultProps) {
         //  Add user
         let userId;
 
         await db.collection("users")
             .insertOne({
                 username: username,
-                amount: 0,
-                bill: 0,
-                change: 0,
-                is_manager: false,
-                is_ready: false,
-                done_with_leftover: false,
-                debtors: [],
-                creditors: []
+                ...defaultProps,
+                // amount: defaultProps.amount,
+                // bill: defaultProps.bill,
+                // change: defaultProps.change,
+                // is_manager: defaultProps.is_manager,
+                // is_ready: defaultProps.is_ready,
+                // done_with_leftover: defaultProps.done_with_leftover,
+                // done_with_payment: defaultProps.done_with_payment
             })
             .then(result => {
                 userId = result.insertedId;
@@ -94,6 +94,16 @@ module.exports = {
 
         return userId;
 
+    },
+    ResetUserProps: async function (userId, defaultProps) {
+        await db.collection("users").updateOne(
+            {
+                _id: new ObjectId(userId)
+            },
+            {
+                $set: { ...defaultProps }
+            }
+        )
     },
     AddDebt: async function (creditorId, debtorId, amount) {
         // * currently passing usernames as well as ids to make the lookup easier, in the future can maybe use only 

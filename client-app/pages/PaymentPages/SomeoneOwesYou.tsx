@@ -14,7 +14,7 @@ export default function SomeoneOwesYou({ Debtors }) {
 
     async function HandleFinished() {
         navigation.navigate('home');
-        socket.emit('leaveGroup', await GetUserId());
+        // socket.emit('leaveGroup', await GetUserId());
     }
 
 

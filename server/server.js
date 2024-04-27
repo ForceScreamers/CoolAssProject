@@ -10,6 +10,16 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
+//  Every user's default properties
+const DB_DEFAULT_USER_PROPS = {
+    amount: 0,
+    bill: 0,
+    change: 0,
+    is_manager: false,
+    is_ready: false,
+    done_with_leftover: false,
+    done_with_payment: false
+}
 
 app.use(cors())
 
@@ -50,7 +60,10 @@ io.on('connection', (socket) => {
         console.log("username", data.username)
 
         if (isUsernameValid(data.username)) {
-            let userId = await Helper.AddNewUser(data.username)
+
+
+
+            let userId = await Helper.AddNewUser(data.username, DB_DEFAULT_USER_PROPS);
 
             socket.emit('updateId', { userId: userId })
             proceedToHome()
@@ -252,7 +265,10 @@ io.on('connection', (socket) => {
             // socket.emit('paymentPayedFor', { creditor: creditors })
 
             let debtors = await Helper.GetDebtorsForUser(data.userId);
-            socket.emit('someoneOwesYou', debtors)
+            socket.emit('someoneOwesYou', debtors);
+
+            await Helper.ResetUserProps(data.userId, DB_DEFAULT_USER_PROPS);
+            await Helper.RemoveUserFromParentGroup(data.userId);
         }
 
 
@@ -292,6 +308,7 @@ io.on('connection', (socket) => {
         }
     })
 
+    //? Check if needed
     socket.on('leaveGroup', async userId => {
         let groupId = await Helper.RemoveUserFromParentGroup(userId)
 
@@ -310,10 +327,10 @@ io.on('connection', (socket) => {
             Helper.UpdateChangeForParentGroup(userId)
             navigateToPayment()
 
-            if (await Helper.IsGroupDoneWithLeftover(await Helper.GetParentGroupId(userId))) {
-                // let debtors = await Helper.GetDebtorsForUser(userId);
-                // socket.emit('someoneOwesYou', debtors)
-            }
+            // if (await Helper.IsGroupDoneWithLeftover(await Helper.GetParentGroupId(userId))) {
+            // let debtors = await Helper.GetDebtorsForUser(userId);
+            // socket.emit('someoneOwesYou', debtors)
+            // }
         }
     })
 

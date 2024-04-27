@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "use-async-effect": "^2.2.7"
+  }
+}

@@ -4,6 +4,8 @@ import { socket } from '../../utils/socket';
 import { useNavigation } from '@react-navigation/native';
 import InDebtListDisplay from './InDebtListDisplay';
 import { GetUserId } from '../../utils/storage';
+import useAsyncEffect from 'use-async-effect'
+
 
 export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
 
@@ -19,13 +21,7 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
 
             navigation.navigate('someoneOwesYou');
         })
-
-        // if (IsDoneWithPayment()) {
-        //     console.log("going to someone owes you")
-        //     navigation.navigate('someoneOwesYou');
-        // }
     }, [socket])
-
 
 
     // TODO: Update group needs to update without alerting to rejoin the group!!!!
@@ -33,7 +29,7 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
         //Get all users with negative change
 
         let usersInDebt: { username: string, missingAmount: number, canPayFor: boolean, doneWithLeftover: boolean, id: string }[] = []
-        // console.log()
+
         group.forEach((user) => {
 
             if (user.change < 0) {
@@ -46,8 +42,6 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
                 })
             }
         })
-
-        console.log("🚀 ~ doneWithLeftover:", usersInDebt)
 
         return usersInDebt;
     }
@@ -74,25 +68,22 @@ export default function LeftoverChangePayForSomeone({ GroupList, SetDebtors }) {
         return selfChange;
     }
 
-    //  First, update self change 
-    useEffect(() => {
-        async function UpdateLeftoverChange() {
-            setLeftoverChange(await GetLeftoverChange(GroupList))
-        }
-        UpdateLeftoverChange()
+    useAsyncEffect(async () => {
+        //  First, update self change 
+        setLeftoverChange(await GetLeftoverChange(GroupList))
+
     }, [GroupList])
 
-    //  Then, update the in debt list, according to the self change
-    useEffect(() => {
-        async function UpdateUsersInDebt() {
-            if (IsDoneWithPayment()) {
-                socket.emit('doneWithPayment', { userId: await GetUserId() })
-            }
+    useAsyncEffect(async () => {
+        //  Then, update the users in debt list, according to the leftover change
+        setInDebtList(await GetUsersInDebt(GroupList));
 
-            setInDebtList(GetUsersInDebt(GroupList));
+        //  Every payment for someone, check if user is done
+        if (IsDoneWithPayment()) {
+            socket.emit('doneWithPayment', { userId: await GetUserId() })
         }
-        UpdateUsersInDebt()
-    }, [GroupList, leftoverChange])
+
+    }, [leftoverChange])
 
 
     async function DoneWithLeftover() {
