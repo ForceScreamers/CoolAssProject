@@ -20,9 +20,18 @@
             }
         },
         {
-            "label": "runMetro",
+            "label": "runMetro-8081",
             "type": "shell",
             "command": "cd client-app;npm start",
+            "problemMatcher": [],
+            "presentation": {
+                "group": "groupA"
+            }
+        },
+        {
+            "label": "runMetro-8082",
+            "type": "shell",
+            "command": "cd client-app;npm run start-2",
             "problemMatcher": [],
             "presentation": {
                 "group": "groupA"
@@ -40,7 +49,16 @@
             "label": "runWifiDebug",
             "dependsOn": [
                 "runServer",
-                "runMetro"
+                "runMetro-8081"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "runWifiDebug2devices",
+            "dependsOn": [
+                "runServer",
+                "runMetro-8081",
+                "runMetro-8082",
             ],
             "problemMatcher": []
         }

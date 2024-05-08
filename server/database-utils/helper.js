@@ -166,23 +166,27 @@ module.exports = {
             })
     },
     RemoveUserFromParentGroup: async function (userId) {
-        let parentGroupId = await this.GetParentGroupId(userId);
+        let parentGroupId = ''
+        if (await this.IsUserInAnyGroup(userId)) {
+            parentGroupId = await this.GetParentGroupId(userId);
 
-        console.log(userId)
-        console.log(parentGroupId)
+            console.log(userId)
+            console.log(parentGroupId)
 
-        if (parentGroupId) {
-            await db.collection("groups")
-                .updateOne(
-                    { _id: new ObjectId(parentGroupId) },
-                    { $pull: { user_ids: new ObjectId(userId) } })
-                .catch((err) => {
-                    console.log(err)
-                })
+            if (parentGroupId) {
+                await db.collection("groups")
+                    .updateOne(
+                        { _id: new ObjectId(parentGroupId) },
+                        { $pull: { user_ids: new ObjectId(userId) } })
+                    .catch((err) => {
+                        console.log(err)
+                    })
+            }
+            else {
+                console.log("helper 175: no parent group ID");
+            }
         }
-        else {
-            console.log("helper 175: no parent group ID");
-        }
+
 
         return parentGroupId;
     },

@@ -112,6 +112,8 @@ io.on('connection', (socket) => {
                 try {
                     let group = await Helper.GetGroupByUser(data.userId);
                     socket.emit('updateGroup', group)
+                    socket.broadcast.emit('updateGroup', await Helper.GetGroupByUser(userId))
+
 
                     socket.emit('joinedGroup')
                 }
@@ -180,6 +182,7 @@ io.on('connection', (socket) => {
         await UpdateUserPaymentData(userId, data.payment);
 
         socket.emit('updateGroup', await Helper.GetGroupByUser(userId))
+        socket.broadcast.emit('updateGroup', await Helper.GetGroupByUser(userId))
 
         if (await Helper.IsGroupReadyByUser(userId)) {
 
@@ -310,6 +313,8 @@ io.on('connection', (socket) => {
 
     //? Check if needed
     socket.on('leaveGroup', async userId => {
+        await Helper.ResetUserProps(userId, DB_DEFAULT_USER_PROPS);
+
         let groupId = await Helper.RemoveUserFromParentGroup(userId)
 
         if (await Helper.GroupIsEmpty(groupId)) {
