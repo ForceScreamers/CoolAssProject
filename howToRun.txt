@@ -1,0 +1,17 @@
+How to run app on 2 emulators!
+
+run mongoDB!
+
+open 2 emulators
+terminal 1: run react-native start
+terminal 2: run react-native start --port 8082
+terminal 3: run react-native run-android
+terminal 4: run server (or user task)
+
+if not working, change the socket ip to the current pc's ip
+or change the port inside the emulator dev settings
+
+
+
+
+:D
