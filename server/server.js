@@ -182,13 +182,19 @@ io.on('connection', (socket) => {
         await Helper.UpdateChangeForParentGroup(userId);
     }
 
+    function GetSocketRoom(socket) {
+        return Array.from(socket.rooms)[1]
+    }
+
     socket.on('userReady', async data => {
         let userId = data.userId;
 
+        let room = GetSocketRoom(socket);
+
         await UpdateUserPaymentData(userId, data.payment);
 
-        socket.emit('updateGroup', await Helper.GetGroupByUser(userId))
-        socket.broadcast.emit('updateGroup', await Helper.GetGroupByUser(userId))
+        io.in(room).emit('updateGroup', await Helper.GetGroupByUser(userId))
+
 
         if (await Helper.IsGroupReadyByUser(userId)) {
 
@@ -205,15 +211,21 @@ io.on('connection', (socket) => {
 
             } else if (change === 0) {// No change
 
-                let room = Array.from(socket.rooms)
+                io.in(room).emit('paymentNoChange');
+                // console.log(room);
 
-                io.to(room).emit('paymentNoChange');
-                console.log(room);
-
-                // socket.emit('paymentNoChange')
                 Helper.SetDoneWithPayment(data.userId, true)
             }
         }
+    })
+
+    socket.on('userNotReady', async (userId) => {
+        await Helper.UpdateUserIsReady(userId, false)
+        console.log("Not ready")
+        let group = await Helper.GetGroupByUser(userId);
+
+        let room = GetSocketRoom(socket);
+        io.in(room).emit('updateGroup', group)
     })
 
     socket.on('doneWithPayment', async (data) => {
@@ -307,13 +319,6 @@ io.on('connection', (socket) => {
     })
 
 
-    socket.on('userNotReady', async (userId) => {
-        await Helper.UpdateUserIsReady(userId, false)
-        console.log("Not ready")
-        let group = await Helper.GetGroupByUser(userId);
-        socket.emit('updateGroup', group)
-    })
-
     socket.on('isInAnyGroup', async (userId, proceedToReconnection) => {
         isInAnyGroup = await Helper.IsUserInAnyGroup(userId)
 
@@ -324,13 +329,22 @@ io.on('connection', (socket) => {
 
     //? Check if needed
     socket.on('leaveGroup', async userId => {
+
         await Helper.ResetUserProps(userId, DB_DEFAULT_USER_PROPS);
 
+        // Remove from group in db
         let groupId = await Helper.RemoveUserFromParentGroup(userId)
 
+        // Update with new group (w/o the user that left)
+        console.log(GetSocketRoom(socket))
+        console.log(await Helper.GetGroupById(groupId))
+        io.in(GetSocketRoom(socket)).emit('updateGroup', await Helper.GetGroupById(groupId))
+        // Delete group in db if empty
         if (await Helper.GroupIsEmpty(groupId)) {
             await Helper.DeleteGroup(groupId);
         }
+
+
     })
 
     socket.on('userReconnect', async (userId, navigateToPayment) => {
@@ -343,6 +357,7 @@ io.on('connection', (socket) => {
             socket.join(groupCode)
 
             socket.emit('updateGroup', group)
+
             Helper.UpdateChangeForParentGroup(userId)
             navigateToPayment()
 

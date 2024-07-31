@@ -160,7 +160,7 @@ module.exports = {
             .find({
                 user_ids: { $in: [new ObjectId(userId)] }
             })
-            .project({ _id: 1 })
+            .project({ code: 1 })
             .toArray()
 
         console.log(dbParentGroupId[0])
