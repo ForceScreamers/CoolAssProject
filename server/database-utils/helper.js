@@ -155,6 +155,17 @@ module.exports = {
 
         return this.AddUserToGroupById(userId, groupId[0]._id.toString());
     },
+    GetGroupCodeByUserId: async function (userId) {
+        let dbParentGroupId = await db.collection("groups")
+            .find({
+                user_ids: { $in: [new ObjectId(userId)] }
+            })
+            .project({ _id: 1 })
+            .toArray()
+
+        console.log(dbParentGroupId[0])
+        return dbParentGroupId[0].code.toString();
+    },
     RemoveUserFromGivenGroup: async function (userId, groupId) {
 
         await db.collection("groups")
@@ -206,7 +217,8 @@ module.exports = {
     },
     CreateGroupForUser: async function (userId) {
 
-        // !debug
+        // TODO: create a system for group codes
+        // !    Temporary 
         groupCount++;
 
         let groupId;
@@ -237,7 +249,8 @@ module.exports = {
             console.log("cant create group, already in group!")
         }
 
-        return groupId;
+        //! TEMPORARY !
+        return groupCount;
     },
     GetGroupById: async function (groupId) {
         // Get list of user ids

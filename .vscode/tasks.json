@@ -61,6 +61,12 @@
                 "runMetro-8082",
             ],
             "problemMatcher": []
+        },
+        {
+            "label": "serverAnd2Emulators",
+            "type": "shell",
+            "command": "react-native run-android --port 8081 --deviceId emulator-5554;react-native run-android --port 8082 --deviceId emulator-5556",
+            "problemMatcher": []
         }
     ]
 }

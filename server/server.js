@@ -32,12 +32,6 @@ app.get('/', (req, res) => {
     res.send("HELLO");
 });
 
-
-// app.get('/users', (req, res) => {
-// Helper.GetUsers().then(data => console.log(data))
-// Helper.CreateGroupForUser("6569c41c4b44a4eb21963617").then(data => console.log(data))
-// })
-
 function isUsernameValid(username) {
     if (username === '') {
         return false;
@@ -85,10 +79,13 @@ io.on('connection', (socket) => {
     socket.on('canCreateGroup', async (data) => {
         console.log('creating group')
 
-        let groupId = await Helper.CreateGroupForUser(data.userId)
+        let groupCode = await Helper.CreateGroupForUser(data.userId)
 
-        if (groupId) {
-            socket.emit('createdGroup', { groupCode: groupId });
+
+        if (groupCode) {
+            socket.join(groupCode)
+            console.log("from can create group", socket.rooms)
+            socket.emit('createdGroup', { groupCode: groupCode });
         }
         else {
             socket.emit('cantCreateGroup');
@@ -107,6 +104,13 @@ io.on('connection', (socket) => {
 
         if (!alreadyInGroup && doesGroupExist) {
 
+            // Join room 
+            socket.join(groupCode);
+            console.log(groupCode);
+            console.log(socket.rooms);
+
+
+            //  Join group in db
             Helper.AddUserToGroupByCode(userId, groupCode).then(async () => {
 
                 try {
@@ -121,6 +125,8 @@ io.on('connection', (socket) => {
                     console.error(err);
                 }
             })
+
+
         }
         else {
             console.log("not found")
@@ -198,9 +204,14 @@ io.on('connection', (socket) => {
                 CalculateAndEmitDebtorsForUser(userPaymentData, userId)
 
             } else if (change === 0) {// No change
-                socket.emit('paymentNoChange')
-                Helper.SetDoneWithPayment(data.userId, true)
 
+                let room = Array.from(socket.rooms)
+
+                io.to(room).emit('paymentNoChange');
+                console.log(room);
+
+                // socket.emit('paymentNoChange')
+                Helper.SetDoneWithPayment(data.userId, true)
             }
         }
     })
@@ -327,6 +338,9 @@ io.on('connection', (socket) => {
         if (await Helper.IsUserInAnyGroup(userId) === true) {
 
             let group = await Helper.GetGroupByUser(userId);
+
+            let groupCode = await Helper.GetGroupCodeByUserId(userId);
+            socket.join(groupCode)
 
             socket.emit('updateGroup', group)
             Helper.UpdateChangeForParentGroup(userId)
