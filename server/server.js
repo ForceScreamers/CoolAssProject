@@ -149,12 +149,21 @@ io.on('connection', (socket) => {
 
 
 
-    function CalculateAndEmitMissingAmount(userPaymentData) {
-
+    function CalculateAndEmitMissingAmount(socketId, change) {
+        let missingAmount = Math.abs(change);
+        io.to(socketId).emit('paymentMissingAmount', missingAmount)
     }
 
-    async function CalculateAndEmitDebtorsForUser(userPaymentData, userId) {
+    async function CalculateAndEmitDebtorsForUser(socketId, userId, change) {
+        let usersInDebt = ExtractUsersInDebt(await Helper.GetGroupByUser(userId));
 
+        if (usersInDebt.length === 0) {// No one has negative change, just send change
+            io.to(socketId).emit('leftoverChange', change)
+            Helper.SetDoneWithPayment(userId, true)
+        } else {//Each client will calculate if can pay for the users that the server sends
+            io.to(socketId).emit('paymentLeftoverChangePayForSomeone')
+            Helper.SetDoneWithPayment(userId, true)
+        }
     }
 
 
@@ -191,16 +200,9 @@ io.on('connection', (socket) => {
 
         if (await Helper.IsGroupReadyByUser(userId)) {
 
-            // TODO: When the server resets, update the socket ids to db ids list
             // TODO: Make this more readable
 
-            let userPaymentData = await Helper.GetUserPaymentData(userId)
-
-            // Send to user its state according to their change status
-            let change = userPaymentData.change;
-
             // Get all sockets in the room
-            // let sockets = await io.in(room.toString()).fetchSockets()
             let sockets = Array.from(io.sockets.adapter.rooms.get(room));
 
             console.log(socketIdsToDbIds);
@@ -215,71 +217,31 @@ io.on('connection', (socket) => {
                 }
             })
 
+            console.log("roomSocketIds")
             console.log(roomSocketDbIds)
 
-            // Emit to each user their payment status
+            // Send to user its state according to their change status
             roomSocketDbIds.forEach(async roomSocketDbId => {
                 let socketId = roomSocketDbId.socketId;
                 let userId = roomSocketDbId.dbId;
 
                 let paymentData = await Helper.GetUserPaymentData(userId);
-                let paymentChange = paymentData.change;
+                let change = paymentData.change;
 
-                // io.to(socketId).emit()
 
-                if (paymentChange < 0) {// Owes money
-                    // CalculateAndEmitMissingAmount(userPaymentData)
-                    let amountMissing = Math.abs(paymentChange);
-                    io.to(socketId).emit('paymentMissingAmount', amountMissing)
+                if (change < 0) {// Owes money
+                    CalculateAndEmitMissingAmount(socketId, change)
 
                 } else if (change > 0) {// Has change to spare
-                    // CalculateAndEmitDebtorsForUser(userPaymentData, userId)
-                    let usersInDebt = ExtractUsersInDebt(await Helper.GetGroupByUser(userId));
+                    CalculateAndEmitDebtorsForUser(socketId, userId, change)
 
-                    if (usersInDebt.length === 0) {// No one has negative change, just send change
-                        io.to(socketId).emit('leftoverChange', paymentChange)
-                        Helper.SetDoneWithPayment(userId, true)
-                    } else {//Each client will calculate if can pay for the users that the server sends
-                        io.to(socketId).emit('paymentLeftoverChangePayForSomeone')
-                        Helper.SetDoneWithPayment(userId, true)
-                    }
+                } else if (change === 0) {// No change
 
-                } else if (paymentChange === 0) {// No change
-
-                    // io.in(room.toString()).emit('paymentNoChange');
                     io.to(socketId).emit('paymentNoChange')
 
                     Helper.SetDoneWithPayment(userId, true)
                 }
             })
-
-
-            // if (change < 0) {// Owes money
-            //     // CalculateAndEmitMissingAmount(userPaymentData)
-            //     let amountMissing = Math.abs(userPaymentData.change);
-            //     socket.emit('paymentMissingAmount', amountMissing)
-
-            // } else if (change > 0) {// Has change to spare
-            //     // CalculateAndEmitDebtorsForUser(userPaymentData, userId)
-            //     let usersInDebt = ExtractUsersInDebt(await Helper.GetGroupByUser(userId));
-
-            //     if (usersInDebt.length === 0) {// No one has negative change, just send change
-
-            //         socket.emit('leftoverChange', userPaymentData.change)
-            //         Helper.SetDoneWithPayment(userId, true)
-            //     } else {//Each client will calculate if can pay for the users that the server sends
-
-            //         socket.emit('paymentLeftoverChangePayForSomeone')
-            //         Helper.SetDoneWithPayment(userId, true)
-            //     }
-
-            // } else if (change === 0) {// No change
-
-            //     // io.in(room.toString()).emit('paymentNoChange');
-            //     socket.emit('paymentNoChange')
-
-            //     Helper.SetDoneWithPayment(data.userId, true)
-            // }
         }
     })
 
@@ -433,6 +395,17 @@ io.on('connection', (socket) => {
 
             Helper.UpdateChangeForParentGroup(userId)
             navigateToPayment()
+
+
+            let socketDbId = {
+                socketId: socket.id,
+                dbId: userId.toString()
+            }
+
+            // Add if doesn't exist
+            if (socketIdsToDbIds.indexOf(socketDbId) === -1) {
+                socketIdsToDbIds.push(socketDbId)
+            }
 
             // if (await Helper.IsGroupDoneWithLeftover(await Helper.GetParentGroupId(userId))) {
             // let debtors = await Helper.GetDebtorsForUser(userId);
