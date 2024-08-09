@@ -86,6 +86,7 @@ const App = () => {
         })
 
         socket.on('updateGroup', (data) => {
+            console.log(data)
             setGroupList(data);
             UpdateIsManager(data);
         })

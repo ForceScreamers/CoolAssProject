@@ -8,6 +8,10 @@
             "problemMatcher": [],
             "presentation": {
                 "group": "groupA"
+            },
+            "icon": {
+                "id": "server",
+                "color": "terminal.ansiGreen"
             }
         },
         {
@@ -63,9 +67,56 @@
             "problemMatcher": []
         },
         {
-            "label": "serverAnd2Emulators",
+            "label": "start-app-emulator-1",
             "type": "shell",
-            "command": "react-native run-android --port 8081 --deviceId emulator-5554;react-native run-android --port 8082 --deviceId emulator-5556",
+            "command": "cd client-app; react-native start",
+            "problemMatcher": []
+        },
+        {
+            "label": "start-app-emulator-2",
+            "type": "shell",
+            "command": "cd client-app; react-native start --port 8082; react-native run-android",
+            "problemMatcher": []
+        },
+        {
+            "label": "start-emulator-1",
+            "type": "shell",
+            "command": "cd ~/AppData/Local/Android/Sdk/emulator; ./emulator -avd Pixel_4_API_30",
+            "problemMatcher": [],
+            "icon": {
+                "id": "device-mobile",
+                "color": "terminal.ansiCyan"
+            }
+        },
+        {
+            "label": "start-emulator-2",
+            "type": "shell",
+            "command": "cd ~/AppData/Local/Android/Sdk/emulator; ./emulator -avd pixel_2_q_10_0_-_api_29",
+            "problemMatcher": [],
+            "icon": {
+                "id": "device-mobile",
+                "color": "terminal.ansiCyan"
+            }
+        },
+        {
+            "label": "start-both-emulators",
+            "type": "shell",
+            "dependsOn": [
+                "start-emulator-1",
+                "start-emulator-2",
+            ],
+            "dependsOrder": "parallel",
+            "problemMatcher": []
+        },
+        {
+            "label": "debug-2-emulators",
+            "type": "shell",
+            "dependsOn": [
+                "start-app-emulator-1",
+                "start-app-emulator-2",
+                "runServer"
+            ],
+            "dependsOrder": "parallel",
             "problemMatcher": []
         }
     ]

@@ -83,7 +83,7 @@ io.on('connection', (socket) => {
 
 
         if (groupCode) {
-            socket.join(groupCode)
+            socket.join(groupCode.toString())
             console.log("from can create group", socket.rooms)
             socket.emit('createdGroup', { groupCode: groupCode });
         }
@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
         if (!alreadyInGroup && doesGroupExist) {
 
             // Join room 
-            socket.join(groupCode);
+            socket.join(groupCode.toString());
             console.log(groupCode);
             console.log(socket.rooms);
 
@@ -115,9 +115,7 @@ io.on('connection', (socket) => {
 
                 try {
                     let group = await Helper.GetGroupByUser(data.userId);
-                    socket.emit('updateGroup', group)
-                    socket.broadcast.emit('updateGroup', await Helper.GetGroupByUser(userId))
-
+                    io.in(groupCode.toString()).emit('updateGroup', group)
 
                     socket.emit('joinedGroup')
                 }
@@ -189,10 +187,10 @@ io.on('connection', (socket) => {
     socket.on('userReady', async data => {
         let userId = data.userId;
 
-        let room = GetSocketRoom(socket);
 
         await UpdateUserPaymentData(userId, data.payment);
 
+        let room = GetSocketRoom(socket);
         io.in(room).emit('updateGroup', await Helper.GetGroupByUser(userId))
 
 
@@ -337,13 +335,15 @@ io.on('connection', (socket) => {
 
         // Update with new group (w/o the user that left)
         console.log(GetSocketRoom(socket))
-        console.log(await Helper.GetGroupById(groupId))
-        io.in(GetSocketRoom(socket)).emit('updateGroup', await Helper.GetGroupById(groupId))
+
+        let room = GetSocketRoom(socket);
+        io.in(room).emit('updateGroup', await Helper.GetGroupById(groupId))
+        socket.leave(room);
+
         // Delete group in db if empty
         if (await Helper.GroupIsEmpty(groupId)) {
             await Helper.DeleteGroup(groupId);
         }
-
 
     })
 
@@ -354,7 +354,7 @@ io.on('connection', (socket) => {
             let group = await Helper.GetGroupByUser(userId);
 
             let groupCode = await Helper.GetGroupCodeByUserId(userId);
-            socket.join(groupCode)
+            socket.join(groupCode.toString())
 
             socket.emit('updateGroup', group)
 
