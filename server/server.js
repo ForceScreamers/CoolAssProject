@@ -239,9 +239,17 @@ io.on('connection', (socket) => {
 
                     io.to(socketId).emit('paymentNoChange')
 
-                    Helper.SetDoneWithPayment(userId, true)
+                    Helper.SetDoneWithPayment(userId, true);
+
                 }
             })
+
+            if (Helper.IsGroupDoneWithPayment(await Helper.GetGroupIdByUserId(userId))) {
+                let groupId = await Helper.GetGroupIdByUserId(userId);
+
+                Helper.ResetPropsForUsersInGroup(groupId, DB_DEFAULT_USER_PROPS);
+                Helper.DeleteGroup(groupId);
+            }
         }
     })
 

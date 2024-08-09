@@ -105,6 +105,12 @@ module.exports = {
             }
         )
     },
+    ResetPropsForUsersInGroup: async function (groupId, defaultProps) {
+        let group = await this.GetGroupById(groupId);
+        group.forEach(user => {
+            this.ResetUserProps(user.id, defaultProps);
+        })
+    },
     AddDebt: async function (creditorId, debtorId, amount) {
         // * currently passing usernames as well as ids to make the lookup easier, in the future can maybe use only 
         // * ids and join the documents
@@ -165,6 +171,17 @@ module.exports = {
 
         console.log(dbParentGroupId[0])
         return dbParentGroupId[0].code.toString();
+    },
+    GetGroupIdByUserId: async function (userId) {
+        let dbParentGroupId = await db.collection("groups")
+            .find({
+                user_ids: { $in: [new ObjectId(userId)] }
+            })
+            .project({ _id: 1 })
+            .toArray()
+
+
+        return dbParentGroupId[0]._id.toString();
     },
     RemoveUserFromGivenGroup: async function (userId, groupId) {
 
@@ -418,8 +435,20 @@ module.exports = {
             .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: amount } })
     },
 
+
+    IsGroupDoneWithPayment: async function (groupId) {
+        let group = await this.GetGroupById(groupId)
+
+        let isDoneWithPayment = true;
+        group.forEach(user => {
+            if (user.done_with_payment === false) {
+                isDoneWithPayment = false;
+            }
+        })
+
+        return isDoneWithPayment;
+    },
     IsGroupDoneWithLeftover: async function (groupId) {
-        // this.GetGroupById
         let group = await this.GetGroupById(groupId)
 
         let isDoneWithLeftover = true;
