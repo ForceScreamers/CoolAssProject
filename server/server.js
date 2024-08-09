@@ -191,7 +191,8 @@ io.on('connection', (socket) => {
 
         if (await Helper.IsGroupReadyByUser(userId)) {
 
-
+            // TODO: When the server resets, update the socket ids to db ids list
+            // TODO: Make this more readable
 
             let userPaymentData = await Helper.GetUserPaymentData(userId)
 
