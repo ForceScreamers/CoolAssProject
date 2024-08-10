@@ -88,7 +88,7 @@ io.on('connection', (socket) => {
         let groupCode = await Helper.CreateGroupForUser(data.userId)
 
 
-        if (groupCode) {
+        if (groupCode !== undefined) {
             socket.join(groupCode.toString())
             console.log("from can create group", socket.rooms)
             socket.emit('createdGroup', { groupCode: groupCode });
@@ -191,6 +191,7 @@ io.on('connection', (socket) => {
     socket.on('userReady', async data => {
         let userId = data.userId;
 
+        console.log(userId)
 
         await UpdateUserPaymentData(userId, data.payment);
 
@@ -244,18 +245,19 @@ io.on('connection', (socket) => {
                 }
             })
 
-            if (Helper.IsGroupDoneWithPayment(await Helper.GetGroupIdByUserId(userId))) {
-                let groupId = await Helper.GetGroupIdByUserId(userId);
+            // if (Helper.IsGroupDoneWithPayment(await Helper.GetGroupIdByUserId(userId))) {
+            //     let groupId = await Helper.GetGroupIdByUserId(userId);
 
-                Helper.ResetPropsForUsersInGroup(groupId, DB_DEFAULT_USER_PROPS);
-                Helper.DeleteGroup(groupId);
-            }
+            //     Helper.ResetPropsForUsersInGroup(groupId, DB_DEFAULT_USER_PROPS);
+            //     Helper.DeleteGroup(groupId);
+            // }
         }
     })
 
     socket.on('userNotReady', async (userId) => {
         await Helper.UpdateUserIsReady(userId, false)
         console.log("Not ready")
+        console.log(userId)
         let group = await Helper.GetGroupByUser(userId);
 
         let room = GetSocketRoom(socket);
@@ -353,10 +355,22 @@ io.on('connection', (socket) => {
     })
 
 
-    socket.on('isInAnyGroup', async (userId, proceedToReconnection) => {
+    socket.on('checkReconnection', async (userId, proceedToReconnection) => {
         isInAnyGroup = await Helper.IsUserInAnyGroup(userId)
 
         if (isInAnyGroup) {
+
+            // Add to socket to db ids list again
+            let socketDbId = {
+                socketId: socket.id,
+                dbId: userId.toString()
+            }
+
+            // Add if doesn't exist
+            if (socketIdsToDbIds.indexOf(socketDbId) === -1) {
+                socketIdsToDbIds.push(socketDbId)
+            }
+
             proceedToReconnection()
         }
     })
@@ -394,6 +408,16 @@ io.on('connection', (socket) => {
         console.log("Reconnecting...");
         if (await Helper.IsUserInAnyGroup(userId) === true) {
 
+            // let socketDbId = {
+            //     socketId: socket.id,
+            //     dbId: userId.toString()
+            // }
+
+            // // Add if doesn't exist
+            // if (socketIdsToDbIds.indexOf(socketDbId) === -1) {
+            //     socketIdsToDbIds.push(socketDbId)
+            // }
+
             let group = await Helper.GetGroupByUser(userId);
 
             let groupCode = await Helper.GetGroupCodeByUserId(userId);
@@ -405,20 +429,14 @@ io.on('connection', (socket) => {
             navigateToPayment()
 
 
-            let socketDbId = {
-                socketId: socket.id,
-                dbId: userId.toString()
-            }
-
-            // Add if doesn't exist
-            if (socketIdsToDbIds.indexOf(socketDbId) === -1) {
-                socketIdsToDbIds.push(socketDbId)
-            }
 
             // if (await Helper.IsGroupDoneWithLeftover(await Helper.GetParentGroupId(userId))) {
             // let debtors = await Helper.GetDebtorsForUser(userId);
             // socket.emit('someoneOwesYou', debtors)
             // }
+        }
+        else {
+            socket.emit('')
         }
     })
 

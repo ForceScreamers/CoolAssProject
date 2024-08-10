@@ -13,26 +13,26 @@ export default function Home({ IsConnected }) {
     const navigation = useNavigation<any>();
 
 
-    useEffect(() => {
-        async function ReconnectUser() {
-            socket.emit('userReconnect', await GetUserId(), () => {
-                navigation.navigate('payment')
-            });
-        }
+    // useEffect(() => {
+    //     async function ReconnectUser() {
+    //         socket.emit('userReconnect', await GetUserId(), () => {
+    //             navigation.navigate('payment')
+    //         });
+    //     }
 
-        async function LeaveGroup() {
-            socket.emit('leaveGroup', await GetUserId())
-            console.log("leaving group...")
-        }
+    //     async function LeaveGroup() {
+    //         socket.emit('leaveGroup', await GetUserId())
+    //         console.log("leaving group...")
+    //     }
 
-        async function CheckReconnection() {
-            socket.emit('isInAnyGroup', await GetUserId(), () => {
-                ShowReconnectAlert(ReconnectUser, LeaveGroup)
-            })
-        }
+    //     async function CheckReconnection() {
+    //         socket.emit('isInAnyGroup', await GetUserId(), () => {
+    //             ShowReconnectAlert(ReconnectUser, LeaveGroup)
+    //         })
+    //     }
 
-        CheckReconnection()
-    }, [IsConnected])
+    //     CheckReconnection()
+    // }, [IsConnected])
 
 
 

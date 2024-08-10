@@ -297,17 +297,24 @@ module.exports = {
             })
             .toArray()
 
-
+        console.log("Get Group by user")
+        console.log(userId)
         // Parse into list of IDs ONLY
         let parsedUserIds = []
-        dbUserIds[0].user_ids.forEach(userId => {
-            parsedUserIds.push(userId)
-        })
 
-        // Get the users by the list of IDs, ommiting the secret stuff (user_id...)
-        let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).toArray()
+        if (dbUserIds[0]) {
+            dbUserIds[0].user_ids.forEach(userId => {
+                parsedUserIds.push(userId)
+            })
 
-        return users;
+            // Get the users by the list of IDs, ommiting the secret stuff (user_id...)
+            let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).toArray()
+
+            return users;
+        }
+        else {
+            return []
+        }
     },
     UpdateUsername: async function (userId, newUsername) {
         await db.collection("users")
@@ -339,7 +346,7 @@ module.exports = {
 
         // TODO: Remove id field from result
 
-        return await this.GetGroupByUser(userId)
+        // return await this.GetGroupByUser(userId)
     },
     UpdateUserChange: async function (userId, change) {
         await db.collection("users")
@@ -372,7 +379,10 @@ module.exports = {
             .toArray()
 
         console.log(dbParentGroupId[0])
-        return dbParentGroupId[0]._id.toString();
+        if (dbParentGroupId[0]) {
+            return dbParentGroupId[0]._id.toString();
+        }
+        return "none"
     },
     GetGroupTip: async function (groupId) {
         let groupTip = await db.collection("groups")

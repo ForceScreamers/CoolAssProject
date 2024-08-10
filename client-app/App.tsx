@@ -22,6 +22,7 @@ import YouOweSomeone from './pages/PaymentPages/YouOweSomeone'
 import LeftoverChange from './pages/PaymentPages/LeftoverChange'
 import LeftoverChangePayForSomeone from './pages/PaymentPages/LeftoverChangePayForSomeone'
 import SomeoneOwesYou from './pages/PaymentPages/SomeoneOwesYou'
+import ShowReconnectAlert from './pages/Home/components/ShowReconnectAlert.tsx';
 
 
 
@@ -116,7 +117,26 @@ const App = () => {
         }
     }, [socket])
 
+    useEffect(() => {
+        async function ReconnectUser() {
+            socket.emit('userReconnect', await GetUserId(), () => {
+                // navigation.navigate('payment')
+            });
+        }
 
+        async function LeaveGroup() {
+            socket.emit('leaveGroup', await GetUserId())
+            console.log("leaving group...")
+        }
+
+        async function CheckReconnection() {
+            socket.emit('checkReconnection', await GetUserId(), () => {
+                ShowReconnectAlert(ReconnectUser, LeaveGroup)
+            })
+        }
+
+        CheckReconnection()
+    }, [isConnected])
 
 
     return (

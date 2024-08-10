@@ -21,7 +21,8 @@ console.warn("DEBUG: Remember to check IP address!!!!");
 export const socket = io(`http://192.168.14.187:${PORT}`, {
     'reconnection': true,
     'reconnectionDelay': 500,
-    'reconnectionAttempts': 10
+    // 'reconnectionAttempts': 10,
+    'forceNew': true
 });
 
 
