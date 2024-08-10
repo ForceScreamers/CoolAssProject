@@ -86,8 +86,29 @@ const App = () => {
             StoreUserId(data.userId)
         })
 
-        socket.on('updateGroup', (data) => {
+        async function MoveUserToBeginning(data) {
+            let userId = await GetUserId();
+            let userIndex = 0;
+            // Set this user as the first entry in the group list
+            for (let i = 0; i < data.length; i++) {
+                if (data[i]._id === userId) {
+                    userIndex = i;
+                }
+            }
+
+
+
+            let element = data[userIndex];
+            data.splice(userIndex, 1);
+            data.unshift(element);
+            // data.splice(0, 0, element);
+        }
+
+        socket.on('updateGroup', async (data) => {
             console.log(data)
+
+            await MoveUserToBeginning(data);
+
             setGroupList(data);
             UpdateIsManager(data);
         })
@@ -117,26 +138,26 @@ const App = () => {
         }
     }, [socket])
 
-    useEffect(() => {
-        async function ReconnectUser() {
-            socket.emit('userReconnect', await GetUserId(), () => {
-                // navigation.navigate('payment')
-            });
-        }
+    // useEffect(() => {
+    //     async function ReconnectUser() {
+    //         socket.emit('userReconnect', await GetUserId(), () => {
+    //             navigation.navigate('payment')
+    //         });
+    //     }
 
-        async function LeaveGroup() {
-            socket.emit('leaveGroup', await GetUserId())
-            console.log("leaving group...")
-        }
+    //     async function LeaveGroup() {
+    //         socket.emit('leaveGroup', await GetUserId())
+    //         console.log("leaving group...")
+    //     }
 
-        async function CheckReconnection() {
-            socket.emit('checkReconnection', await GetUserId(), () => {
-                ShowReconnectAlert(ReconnectUser, LeaveGroup)
-            })
-        }
+    //     async function CheckReconnection() {
+    //         socket.emit('checkReconnection', await GetUserId(), () => {
+    //             ShowReconnectAlert(ReconnectUser, LeaveGroup)
+    //         })
+    //     }
 
-        CheckReconnection()
-    }, [isConnected])
+    //     CheckReconnection()
+    // }, [isConnected])
 
 
     return (
