@@ -245,6 +245,8 @@ io.on('connection', (socket) => {
                 }
             })
 
+            // TODO: Disable returning from "done with payment" screen after finishing the payment
+            // TODO: Reset all users props after finishing with payment
             // if (Helper.IsGroupDoneWithPayment(await Helper.GetGroupIdByUserId(userId))) {
             //     let groupId = await Helper.GetGroupIdByUserId(userId);
 
@@ -408,16 +410,6 @@ io.on('connection', (socket) => {
         console.log("Reconnecting...");
         if (await Helper.IsUserInAnyGroup(userId) === true) {
 
-            // let socketDbId = {
-            //     socketId: socket.id,
-            //     dbId: userId.toString()
-            // }
-
-            // // Add if doesn't exist
-            // if (socketIdsToDbIds.indexOf(socketDbId) === -1) {
-            //     socketIdsToDbIds.push(socketDbId)
-            // }
-
             let group = await Helper.GetGroupByUser(userId);
 
             let groupCode = await Helper.GetGroupCodeByUserId(userId);
@@ -434,9 +426,6 @@ io.on('connection', (socket) => {
             // let debtors = await Helper.GetDebtorsForUser(userId);
             // socket.emit('someoneOwesYou', debtors)
             // }
-        }
-        else {
-            socket.emit('')
         }
     })
 

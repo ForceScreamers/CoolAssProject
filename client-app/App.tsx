@@ -89,6 +89,7 @@ const App = () => {
         async function MoveUserToBeginning(data) {
             let userId = await GetUserId();
             let userIndex = 0;
+
             // Set this user as the first entry in the group list
             for (let i = 0; i < data.length; i++) {
                 if (data[i]._id === userId) {
@@ -96,12 +97,10 @@ const App = () => {
                 }
             }
 
-
-
+            // Move to the first position of array
             let element = data[userIndex];
             data.splice(userIndex, 1);
             data.unshift(element);
-            // data.splice(0, 0, element);
         }
 
         socket.on('updateGroup', async (data) => {
@@ -137,27 +136,6 @@ const App = () => {
             // TODO Check what and how to use socket off
         }
     }, [socket])
-
-    // useEffect(() => {
-    //     async function ReconnectUser() {
-    //         socket.emit('userReconnect', await GetUserId(), () => {
-    //             navigation.navigate('payment')
-    //         });
-    //     }
-
-    //     async function LeaveGroup() {
-    //         socket.emit('leaveGroup', await GetUserId())
-    //         console.log("leaving group...")
-    //     }
-
-    //     async function CheckReconnection() {
-    //         socket.emit('checkReconnection', await GetUserId(), () => {
-    //             ShowReconnectAlert(ReconnectUser, LeaveGroup)
-    //         })
-    //     }
-
-    //     CheckReconnection()
-    // }, [isConnected])
 
 
     return (
