@@ -17,6 +17,8 @@ let groupCount = 0;
 // TODO: Create an error handler for queries instead of catch(()=>{})
 
 module.exports = {
+    // #region User functions
+
     GetUsers: async function () {
         let users = []
         await db.collection("users")
@@ -26,14 +28,6 @@ module.exports = {
                 console.log(err)
             })
         return users;
-    },
-    DoesGroupExistByCode: async function (groupCode) {
-        let groupCount = await db.collection("groups")
-            .count({
-                code: groupCode
-            })
-            .catch(err => console.log(err))
-        return groupCount == 0 ? false : true
     },
     DoesUserExist: async function (userId) {
         // Check if exists
@@ -52,25 +46,6 @@ module.exports = {
 
         return userData[0];
     },
-    // GetGroupPaymentData: async function (groupId) {
-    //     let dbUserIds = await db.collection("groups")
-    //         .find({
-    //             _id: new ObjectId(groupId)
-    //         })
-    //         .toArray()
-
-    //     // Parse into list of IDs ONLY
-    //     let parsedUserIds = []
-    //     dbUserIds[0].user_ids.forEach(userId => {
-    //         parsedUserIds.push(userId)
-    //     })
-
-    //     let projectionFields = { _id: 1, amount: 1, bill: 1, change: 1 }
-
-    //     let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).project(projectionFields).toArray()
-
-    //     return users;
-    // },
     AddNewUser: async function (username, defaultProps) {
         //  Add user
         let userId;
@@ -95,22 +70,6 @@ module.exports = {
         return userId;
 
     },
-    ResetUserProps: async function (userId, defaultProps) {
-        await db.collection("users").updateOne(
-            {
-                _id: new ObjectId(userId)
-            },
-            {
-                $set: { ...defaultProps }
-            }
-        )
-    },
-    ResetPropsForUsersInGroup: async function (groupId, defaultProps) {
-        let group = await this.GetGroupById(groupId);
-        group.forEach(user => {
-            this.ResetUserProps(user.id, defaultProps);
-        })
-    },
     AddDebt: async function (creditorId, debtorId, amount) {
         // * currently passing usernames as well as ids to make the lookup easier, in the future can maybe use only 
         // * ids and join the documents
@@ -124,23 +83,16 @@ module.exports = {
             { upsert: true }
         )
     },
-
-    GroupIsEmpty: async function (groupId) {
-        let count = await this.GetGroupUserCount(groupId)
-
-        return count == 0
+    ResetUserProps: async function (userId, defaultProps) {
+        await db.collection("users").updateOne(
+            {
+                _id: new ObjectId(userId)
+            },
+            {
+                $set: { ...defaultProps }
+            }
+        )
     },
-    DeleteGroup: async function (groupId) {
-        //!debug
-        groupCount--;
-
-        await db.collection("groups")
-            .deleteOne(
-                { _id: new ObjectId(groupId) }
-            )
-
-    },
-
     AddUserToGroupById: async function (userId, groupId) {
         await db.collection("groups")
             .updateOne(
@@ -160,28 +112,6 @@ module.exports = {
 
 
         return this.AddUserToGroupById(userId, groupId[0]._id.toString());
-    },
-    GetGroupCodeByUserId: async function (userId) {
-        let dbParentGroupId = await db.collection("groups")
-            .find({
-                user_ids: { $in: [new ObjectId(userId)] }
-            })
-            .project({ code: 1 })
-            .toArray()
-
-        console.log(dbParentGroupId[0])
-        return dbParentGroupId[0].code.toString();
-    },
-    GetGroupIdByUserId: async function (userId) {
-        let dbParentGroupId = await db.collection("groups")
-            .find({
-                user_ids: { $in: [new ObjectId(userId)] }
-            })
-            .project({ _id: 1 })
-            .toArray()
-
-
-        return dbParentGroupId[0]._id.toString();
     },
     RemoveUserFromGivenGroup: async function (userId, groupId) {
 
@@ -269,22 +199,43 @@ module.exports = {
         //! TEMPORARY !
         return groupCount;
     },
-    GetGroupById: async function (groupId) {
-        // Get list of user ids
-        let dbUserIds = await db.collection("groups")
-            .find({ _id: new ObjectId(groupId) })
+    ResetPropsForUsersInGroup: async function (groupId, defaultProps) {
+        let group = await this.GetGroupById(groupId);
+        group.forEach(user => {
+            this.ResetUserProps(user.id, defaultProps);
+        })
+    },
+    GetGroupIdByUserId: async function (userId) {
+        let dbParentGroupId = await db.collection("groups")
+            .find({
+                user_ids: { $in: [new ObjectId(userId)] }
+            })
+            .project({ _id: 1 })
             .toArray()
 
-        // Parse into list of IDs ONLY
-        let parsedUserIds = []
-        dbUserIds[0].user_ids.forEach(userId => {
-            parsedUserIds.push(userId)
-        })
 
-        // Get the users' data by the list of IDs, ommiting the secret stuff (user_id...)
-        let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).toArray()
+        return dbParentGroupId[0]._id.toString();
+    },
+    GetGroupCodeByUserId: async function (userId) {
+        let dbParentGroupId = await db.collection("groups")
+            .find({
+                user_ids: { $in: [new ObjectId(userId)] }
+            })
+            .project({ code: 1 })
+            .toArray()
 
-        return users;
+        console.log(dbParentGroupId[0])
+        return dbParentGroupId[0].code.toString();
+    },
+
+
+    DoesGroupExistByCode: async function (groupCode) {
+        let groupCount = await db.collection("groups")
+            .count({
+                code: groupCode
+            })
+            .catch(err => console.log(err))
+        return groupCount == 0 ? false : true
     },
     GetGroupByUser: async function (userId) {
         // Get user ids 
@@ -384,6 +335,119 @@ module.exports = {
         }
         return "none"
     },
+    UpdateChangeForParentGroup: async function (userId) {
+        // Get users
+        let usersInGroup = await this.GetGroupByUser(userId);
+
+        // Get group data 
+        let parentGroupId = await this.GetParentGroupId(userId);
+        let userCount = await this.GetGroupUserCount(parentGroupId);
+        let groupTip = await this.GetGroupTip(parentGroupId);
+
+
+        // Update change for all users
+        usersInGroup.forEach(async user => {
+            let change = 0;
+
+            // !
+            change = user.amount - (groupTip / userCount + user.bill);// Deduct the individual tip from the payment
+            change = +change.toFixed(2);//  Round to two decimal places
+
+
+
+            await this.UpdateUserChange(user._id.toString(), change)
+        })
+    },
+
+    SubtractCreditorAmount: async function (creditorId, amount) {
+        await db.collection("users")
+            .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: -amount } })
+    },
+    AddCreditorAmount: async function (creditorId, amount) {
+        await db.collection("users")
+            .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: amount } })
+    },
+    EvalUserDebtState: async function (userId) {
+        console.log("eval");
+        let stateCount = await db.collection("users")
+            .aggregate([
+                {
+                    $match: { _id: new ObjectId(userId) }
+                },
+                {
+                    $project: {
+                        creditorsCount: { $size: "$creditors" },
+                        debtorsCount: { $size: "$debtors" }
+                    }
+                }
+            ])
+            .toArray()
+
+        console.log("🚀 ~ file: helper.js:411 ~ stateCount[0]:", stateCount[0])
+        if (stateCount[0].creditorsCount > 0 && stateCount[0].debtorsCount === 0) {
+            return DEBT_STATE.DEBTOR;
+        } else if (stateCount[0].creditorsCount === 0 && stateCount[0].debtorsCount > 0) {
+            return DEBT_STATE.CREDITOR;
+        } else {
+            return DEBT_STATE.NO_DEBT;
+        }
+    },
+
+    // #endregion
+
+    // GetGroupPaymentData: async function (groupId) {
+    //     let dbUserIds = await db.collection("groups")
+    //         .find({
+    //             _id: new ObjectId(groupId)
+    //         })
+    //         .toArray()
+
+    //     // Parse into list of IDs ONLY
+    //     let parsedUserIds = []
+    //     dbUserIds[0].user_ids.forEach(userId => {
+    //         parsedUserIds.push(userId)
+    //     })
+
+    //     let projectionFields = { _id: 1, amount: 1, bill: 1, change: 1 }
+
+    //     let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).project(projectionFields).toArray()
+
+    //     return users;
+    // },
+
+    // #region Group functions
+    GroupIsEmpty: async function (groupId) {
+        let count = await this.GetGroupUserCount(groupId)
+
+        return count == 0
+    },
+    DeleteGroup: async function (groupId) {
+        //!debug
+        groupCount--;
+
+        await db.collection("groups")
+            .deleteOne(
+                { _id: new ObjectId(groupId) }
+            )
+
+    },
+    GetGroupById: async function (groupId) {
+        // Get list of user ids
+        let dbUserIds = await db.collection("groups")
+            .find({ _id: new ObjectId(groupId) })
+            .toArray()
+
+        // Parse into list of IDs ONLY
+        let parsedUserIds = []
+        dbUserIds[0].user_ids.forEach(userId => {
+            parsedUserIds.push(userId)
+        })
+
+        // Get the users' data by the list of IDs, ommiting the secret stuff (user_id...)
+        let users = await db.collection("users").find({ _id: { $in: parsedUserIds } }).toArray()
+
+        return users;
+    },
     GetGroupTip: async function (groupId) {
         let groupTip = await db.collection("groups")
             .find({ _id: new ObjectId(groupId) })
@@ -410,42 +474,6 @@ module.exports = {
 
         return dbResult[0].userCount;
     },
-    UpdateChangeForParentGroup: async function (userId) {
-        // Get users
-        let usersInGroup = await this.GetGroupByUser(userId);
-
-        // Get group data 
-        let parentGroupId = await this.GetParentGroupId(userId);
-        let userCount = await this.GetGroupUserCount(parentGroupId);
-        let groupTip = await this.GetGroupTip(parentGroupId);
-
-
-        // Update change for all users
-        usersInGroup.forEach(async user => {
-            let change = 0;
-
-            // !
-            change = user.amount - (groupTip / userCount + user.bill);// Deduct the individual tip from the payment
-            change = +change.toFixed(2);//  Round to two decimal places
-
-
-
-            await this.UpdateUserChange(user._id.toString(), change)
-        })
-    },
-    // GetUsersWithNegativeChange: async function (groupId) {
-    //     let group = await this.GetGroupByUser
-    // }
-    SubtractCreditorAmount: async function (creditorId, amount) {
-        await db.collection("users")
-            .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: -amount } })
-    },
-    AddCreditorAmount: async function (creditorId, amount) {
-        await db.collection("users")
-            .updateOne({ _id: new ObjectId(creditorId) }, { $inc: { change: amount } })
-    },
-
-
     IsGroupDoneWithPayment: async function (groupId) {
         let group = await this.GetGroupById(groupId)
 
@@ -470,6 +498,9 @@ module.exports = {
 
         return isDoneWithLeftover;
     },
+
+    // #endregion
+
     GetCreditorsForUser: async function (userId) {
         //from group get all users
         // let parentGroup = await this.GetGroupById(this.GetParentGroupId(userId))
@@ -577,30 +608,5 @@ module.exports = {
             return debtors
         }
     },
-    EvalUserDebtState: async function (userId) {
-        console.log("eval");
-        let stateCount = await db.collection("users")
-            .aggregate([
-                {
-                    $match: { _id: new ObjectId(userId) }
-                },
-                {
-                    $project: {
-                        creditorsCount: { $size: "$creditors" },
-                        debtorsCount: { $size: "$debtors" }
-                    }
-                }
-            ])
-            .toArray()
-
-        console.log("🚀 ~ file: helper.js:411 ~ stateCount[0]:", stateCount[0])
-        if (stateCount[0].creditorsCount > 0 && stateCount[0].debtorsCount === 0) {
-            return DEBT_STATE.DEBTOR;
-        } else if (stateCount[0].creditorsCount === 0 && stateCount[0].debtorsCount > 0) {
-            return DEBT_STATE.CREDITOR;
-        } else {
-            return DEBT_STATE.NO_DEBT;
-        }
-    }
 
 }
